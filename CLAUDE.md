@@ -46,10 +46,11 @@ Scripts load in this order in `index.html`. **Order matters** - later scripts ov
 3. `helpers.js` - Utilities (clipboard, download, browser detection)
 4. `xml.js` - AssignedAccess XML generation
 5. `validation.js` - Input validation rules
-6. `app.js` - Core UI logic, mode switching, Edge args, exports
+6. `app.js` - Core UI logic, mode switching, Edge args, welcome modal, callouts
 7. `apps.js` - Allowed apps management
 8. `pins.js` - Unified pin management for Start menu and Taskbar
-9. `config.js` - Save/load/import/export + **actionHandlers event delegation**
+9. `exports.js` - Export downloads (XML, PowerShell, shortcuts, README) with PS1 templates
+10. `config.js` - Save/load/import/export + **actionHandlers event delegation**
 
 **Important:** `actionHandlers` (the event dispatch map) lives at the end of `config.js` so it captures references to the correct modular functions. If you add a new action handler, add it to `actionHandlers` in config.js.
 
@@ -57,9 +58,10 @@ Scripts load in this order in `index.html`. **Order matters** - later scripts ov
 
 | File | Purpose |
 |------|---------|
-| `app.js` | Core UI: mode switching, Edge args builder, export generation, KioskOverseer Sentry, welcome modal, callouts |
+| `app.js` | Core UI: mode switching, Edge args builder, welcome modal, callouts, tooltips |
 | `apps.js` | Allowed apps CRUD: addAllowedApp, removeApp, renderAppList, auto-launch selection |
 | `pins.js` | All pin operations for both Start menu and Taskbar (uses `PIN_LIST_CONFIG`) |
+| `exports.js` | Export downloads (XML, PowerShell, shortcuts, README) with `fillTemplate()` and PS1 template constants |
 | `config.js` | Configuration persistence + `actionHandlers` event delegation |
 | `xml.js` | AssignedAccess XML generation with namespace handling (rs5, v3, v4, v5) |
 | `validation.js` | Input validation rules, returns error objects with field and message |
@@ -186,31 +188,16 @@ Update versions after changes to:
 
 ### How to Update Versions
 
-**ALWAYS update ALL of these together** - never update just one:
+Run the version bump script:
 
-1. **Header build version** (displays to user):
-```html
-KIOSK OVERSEER // BUILD X.X.X
+```bash
+./bump-version.sh patch       # 1.8.3 → 1.8.4
+./bump-version.sh minor       # 1.8.3 → 1.9.0
+./bump-version.sh major       # 1.8.3 → 2.0.0
+./bump-version.sh 2.0.0       # explicit version
 ```
 
-2. **All file version query strings**:
-```html
-<link rel="stylesheet" href="styles.css?v=X.X.X">
-...
-<script src="dom.js?v=X.X.X"></script>
-<script src="state.js?v=X.X.X"></script>
-<script src="helpers.js?v=X.X.X"></script>
-<script src="xml.js?v=X.X.X"></script>
-<script src="validation.js?v=X.X.X"></script>
-<script src="app.js?v=X.X.X"></script>
-<script src="apps.js?v=X.X.X"></script>
-<script src="pins.js?v=X.X.X"></script>
-<script src="config.js?v=X.X.X"></script>
-```
-
-Increment the patch version (e.g., `1.1.2` → `1.1.3`) for all locations in sync.
-
-**Example:** If you modify only `app.js` and `index.html`, you still update ALL 11 version locations (1 header + 10 file query strings) from `1.1.2` to `1.1.3`.
+This updates all version locations in `index.html` atomically (header build version + all file query strings).
 
 ## Data Files
 
@@ -232,7 +219,15 @@ App preset structure:
 
 ## Testing
 
-Manual testing only (no automated test framework):
+### Automated Tests
+
+```bash
+node --test tests/*.test.js
+```
+
+80 tests covering `xml.js` (42 tests) and `validation.js` (38 tests). Tests mock `dom.get()` and `state` to run in Node without a browser.
+
+### Manual Testing
 
 1. Test all three kiosk modes (Single-App, Multi-App, Restricted User)
 2. Test tab visibility: single-app hides only Layout tab; multi/restricted show all 6 tabs
