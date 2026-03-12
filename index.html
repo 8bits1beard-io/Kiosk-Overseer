@@ -1,0 +1,1576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://static.cloudflareinsights.com; font-src 'self'; connect-src 'self' https://cloudflareinsights.com; base-uri 'self'; form-action 'self'">
+    <title>Kiosk Overseer (Windows Kiosk Builder)</title>
+    <link rel="stylesheet" href="styles.css?v=1.8.3">
+    <link rel="icon" type="image/png" href="assets/logo-mksa.png">
+</head>
+<body>
+    <!-- Skip Link for Keyboard Users -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <header role="banner">
+        <div class="header-top">
+            <div class="header-system-label">
+                KIOSK OVERSEER // BUILD 1.8.3
+            </div>
+            <nav class="header-actions command-strip" aria-label="Main actions">
+                <button type="button" class="btn-secondary" data-action="loadPreset" data-arg="blank">New</button>
+                <select id="presetSelect" data-change="loadPresetFromSelect" aria-label="Load example configuration" class="btn-secondary" style="min-width: 140px;">
+                    <option value="" disabled selected>Load Example...</option>
+                    <option value="edgeFullscreen">Edge Fullscreen Kiosk</option>
+                    <option value="edgePublic">Edge Public Browsing</option>
+                    <option value="multiApp">Multi-App Kiosk</option>
+                </select>
+                <button type="button" class="btn-secondary" data-action="loadConfig">Load Config</button>
+                <button type="button" class="btn-secondary" data-action="saveConfigAs">Save Config</button>
+            </nav>
+        </div>
+    </header>
+
+    <main id="main-content" class="container layout">
+        <aside class="side-nav" role="navigation" aria-label="Configuration">
+            <div class="side-nav-tabs" role="tablist" aria-label="Configuration sections">
+                <div class="side-nav-title" data-section-key="navigation"></div>
+                <button type="button" class="side-nav-btn active" role="tab" aria-selected="true" aria-controls="tab-mode" id="tab-btn-mode" data-action="switchTab" data-arg="mode" data-section-key="navMode">STEP 1: Kiosk Mode</button>
+                <button type="button" class="side-nav-btn" role="tab" aria-selected="false" aria-controls="tab-apps" id="tab-btn-apps" data-action="switchTab" data-arg="apps" data-section-key="navApps">STEP 2: Applications</button>
+                <button type="button" class="side-nav-btn" role="tab" aria-selected="false" aria-controls="tab-layout" id="tab-btn-layout" data-action="switchTab" data-arg="layout" data-section-key="navLayout">STEP 3: Layout</button>
+                <button type="button" class="side-nav-btn" role="tab" aria-selected="false" aria-controls="tab-account" id="tab-btn-account" data-action="switchTab" data-arg="account" data-section-key="navAccount">STEP 4: Account & Identity</button>
+                <button type="button" class="side-nav-btn" role="tab" aria-selected="false" aria-controls="tab-device" id="tab-btn-device" data-action="switchTab" data-arg="device" data-section-key="navDevice">STEP 5: Device Settings</button>
+                <button type="button" class="side-nav-btn" role="tab" aria-selected="false" aria-controls="tab-summary" id="tab-btn-summary" data-action="switchTab" data-arg="summary" data-section-key="navSummary">Summary & Export</button>
+            </div>
+            <div class="side-nav-logo" role="presentation">
+                <img src="assets/Fallout_MKSA.png" alt="MKSA">
+                <div class="side-nav-logo-caption">
+                    Created by <a href="https://www.linkedin.com/in/joshua-walderbach" target="_blank" rel="noopener noreferrer">Joshua Walderbach</a>
+                    <div class="side-nav-logo-inspiration">
+                        Inspired by the work of <a href="https://www.linkedin.com/in/brandon-villines/" target="_blank" rel="noopener noreferrer">Brandon Villines</a>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Configuration Panel -->
+        <section class="panel">
+            <div class="panel-content with-tabs">
+                <!-- Tab Panels -->
+                <div class="tab-panels">
+                    <!-- Mode Tab -->
+                    <div class="tab-content active" role="tabpanel" id="tab-mode" aria-labelledby="tab-btn-mode">
+                        <!-- Kiosk Mode -->
+                        <fieldset class="section">
+                        <legend class="section-header" data-section-key="kioskMode"></legend>
+                    <div class="section-content">
+                        <div class="toggle-group" role="group" aria-label="Kiosk mode selection">
+                            <button type="button" id="modeSingle" class="active" data-action="setMode" data-arg="single" aria-pressed="true">Single-App</button>
+                            <button type="button" id="modeMulti" data-action="setMode" data-arg="multi" aria-pressed="false">Multi-App</button>
+                            <button type="button" id="modeRestricted" data-action="setMode" data-arg="restricted" aria-pressed="false">Restricted User</button>
+                        </div>
+                        <p class="hint" style="margin-top: 10px;" id="kiosk-mode-hint">
+                            <span id="kioskModeHintText"></span>
+                        </p>
+                    </div>
+                </fieldset>
+                    </div>
+                    <!-- End Mode Tab -->
+
+                    <!-- Applications Tab -->
+                    <div class="tab-content" role="tabpanel" id="tab-apps" aria-labelledby="tab-btn-apps">
+                <!-- Single-App Configuration -->
+                <div id="singleAppConfig">
+                    <fieldset class="section">
+                        <legend class="section-header" data-section-key="singleAppSettings"></legend>
+                        <div class="section-content">
+                            <div class="sub-panel">
+                            <div class="sub-panel-title">APPLICATION TYPE</div>
+                            <div class="form-group">
+                                <label for="appType" class="with-tooltip">
+                                    Application Type
+                                    <button type="button" class="tooltip-icon" aria-label="Help for Application Type" aria-describedby="appType-tooltip">?</button>
+                                    <span class="tooltip-content" id="appType-tooltip" role="tooltip"><strong>Edge Kiosk:</strong> Best for web apps and local HTML. Native kiosk support with idle timeout. <strong>UWP:</strong> Store apps with clean sandboxed integration. <strong>Win32:</strong> Traditional desktop apps. May have RestrictRun issues - use Edge or UWP when possible.</span>
+                                </label>
+                                <select id="appType" data-change="updateAppTypeUI|updatePreview" aria-describedby="appType-tooltip">
+                                    <option value="edge">Microsoft Edge (Kiosk Mode)</option>
+                                    <option value="uwp">UWP / Store App</option>
+                                    <option value="win32">Win32 Desktop App</option>
+                                </select>
+                            </div>
+                            </div>
+
+                            <!-- Edge Configuration -->
+                            <div id="edgeConfig" class="sub-panel" role="group" aria-label="Microsoft Edge settings">
+                                <div class="sub-panel-title">EDGE KIOSK</div>
+                                <div class="form-group">
+                                    <label for="edgeSourceType" class="with-tooltip">
+                                        Load From
+                                        <button type="button" class="tooltip-icon" aria-label="Help for Load From" aria-describedby="edgeSourceType-tooltip">?</button>
+                                        <span class="tooltip-content" id="edgeSourceType-tooltip" role="tooltip">Choose where Edge loads content from. <strong>Web URL:</strong> A website (https://example.com). <strong>Local File:</strong> An HTML file on the device (C:\Kiosk\page.html).</span>
+                                    </label>
+                                    <select id="edgeSourceType" data-change="updateEdgeSourceUI|updatePreview" aria-describedby="edgeSourceType-tooltip">
+                                        <option value="url">Web URL</option>
+                                        <option value="file">Local File</option>
+                                    </select>
+                                </div>
+
+                                <div id="edgeUrlConfig" class="form-group">
+                                    <label for="edgeUrl" class="with-tooltip">
+                                        URL
+                                        <button type="button" class="tooltip-icon" aria-label="Help for URL" aria-describedby="edgeUrl-tooltip">?</button>
+                                        <span class="tooltip-content" id="edgeUrl-tooltip" role="tooltip">The web address Edge will load in kiosk mode. Include the full URL with https://. You can also use file:/// URLs directly (use %20 for spaces in paths).</span>
+                                    </label>
+                                    <input type="text" id="edgeUrl" value="https://www.microsoft.com" placeholder="https://example.com" data-change="updatePreview" aria-describedby="edgeUrl-tooltip">
+                                </div>
+
+                                <div id="edgeFileConfig" class="form-group hidden" aria-hidden="true">
+                                    <label for="edgeFilePath" class="with-tooltip">
+                                        File Path
+                                        <button type="button" class="tooltip-icon" aria-label="Help for File Path" aria-describedby="edgeFilePath-tooltip">?</button>
+                                        <span class="tooltip-content" id="edgeFilePath-tooltip" role="tooltip">Full path to an HTML file on the local device. Use forward slashes. Spaces in the path will be automatically converted to %20.</span>
+                                    </label>
+                                    <input type="text" id="edgeFilePath" placeholder="C:/Kiosk/index.html" data-change="updatePreview" aria-describedby="edgeFilePath-tooltip">
+                                    <p class="hint" style="margin-top: 6px;">
+                                        <strong>TIP:</strong> Use forward slashes (/) in the path. Spaces are converted automatically.<br>
+                                        Example: <code>C:/Program Files/Kiosk/page.html</code> → <code>file:///C:/Program%20Files/Kiosk/page.html</code>
+                                    </p>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="edgeKioskType" class="with-tooltip">
+                                        Kiosk Type
+                                        <button type="button" class="tooltip-icon" aria-label="Help for Kiosk Type" aria-describedby="edgeKioskType-tooltip">?</button>
+                                        <span class="tooltip-content" id="edgeKioskType-tooltip" role="tooltip"><strong>Fullscreen:</strong> Shows only the webpage with no browser UI. Ideal for digital signage. <strong>Public Browsing:</strong> Shows address bar and navigation. Users can browse but sessions reset on idle. Both modes always run InPrivate (no history/cookies saved).</span>
+                                    </label>
+                                    <select id="edgeKioskType" data-change="updatePreview" aria-describedby="edgeKioskType-tooltip">
+                                        <option value="fullscreen">Fullscreen (Digital Signage)</option>
+                                        <option value="public-browsing">Public Browsing</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="edgeIdleTimeout" class="with-tooltip">
+                                        Idle Timeout (minutes)
+                                        <button type="button" class="tooltip-icon" aria-label="Help for Idle Timeout" aria-describedby="edgeIdleTimeout-tooltip">?</button>
+                                        <span class="tooltip-content" id="edgeIdleTimeout-tooltip" role="tooltip">After this many minutes of no user activity, Edge will reset to the home URL and clear the session. Set to 0 to disable timeout. Recommended for public kiosks.</span>
+                                    </label>
+                                    <input type="number" id="edgeIdleTimeout" min="0" max="1440" value="0" placeholder="0 = disabled" data-change="updatePreview" aria-describedby="edgeIdleTimeout-tooltip">
+                                </div>
+                            </div>
+
+                            <!-- UWP App Configuration -->
+                            <div id="uwpConfig" class="hidden sub-panel" aria-hidden="true" role="group" aria-label="UWP App settings">
+                                <div class="sub-panel-title">UWP APP</div>
+                                <div class="form-group">
+                                    <label for="uwpAumid" class="with-tooltip">
+                                        App User Model ID (AUMID)
+                                        <button type="button" class="tooltip-icon" aria-label="Help for AUMID" aria-describedby="uwpAumid-tooltip">?</button>
+                                        <span class="tooltip-content" id="uwpAumid-tooltip" role="tooltip">The unique identifier for a UWP/Store app. Format: PackageName_PublisherId!AppId. To find an app's AUMID, run this in PowerShell: Get-StartApps | Format-Table Name, AppID</span>
+                                    </label>
+                                    <input type="text" id="uwpAumid" placeholder="e.g., Microsoft.WindowsCalculator_8wekyb3d8bbwe!App" data-change="updatePreview" aria-describedby="uwpAumid-tooltip">
+                                </div>
+                            </div>
+
+                            <!-- Win32 App Configuration -->
+                            <div id="win32Config" class="hidden sub-panel" aria-hidden="true" role="group" aria-label="Win32 App settings">
+                                <div class="sub-panel-title">WIN32 APP</div>
+                                <div class="form-group">
+                                    <label for="win32Path" class="with-tooltip">
+                                        Application Path
+                                        <button type="button" class="tooltip-icon" aria-label="Help for Application Path" aria-describedby="win32Path-tooltip">?</button>
+                                        <span class="tooltip-content" id="win32Path-tooltip" role="tooltip">Full path to the .exe file. Warning: Win32 apps use DesktopAppPath which creates RestrictRun registry entries. This can cause "operation cancelled due to restrictions" errors. Consider using Edge Kiosk mode instead when possible.</span>
+                                    </label>
+                                    <input type="text" id="win32Path" placeholder="e.g., C:\Program Files\MyApp\app.exe" data-change="updatePreview" aria-describedby="win32Path-tooltip">
+                                </div>
+                                <div class="form-group">
+                                    <label for="win32Args" class="with-tooltip">
+                                        Arguments (optional)
+                                        <button type="button" class="tooltip-icon" aria-label="Help for Arguments" aria-describedby="win32Args-tooltip">?</button>
+                                        <span class="tooltip-content" id="win32Args-tooltip" role="tooltip">Command-line arguments passed to the application at launch. For example: --fullscreen or --kiosk</span>
+                                    </label>
+                                    <input type="text" id="win32Args" placeholder="e.g., --fullscreen" data-change="updatePreview" aria-describedby="win32Args-tooltip">
+                                </div>
+                            </div>
+
+                            <!-- Breakout Sequence -->
+                            <div class="sub-panel">
+                                <div class="sub-panel-title">BREAKOUT CONTROL</div>
+                                <div class="form-group">
+                                    <div class="checkbox-group">
+                                        <span class="toggle-switch">
+                                            <input type="checkbox" role="switch" id="enableBreakout" data-change="updateBreakoutUI|updatePreview" aria-describedby="enableBreakout-tooltip">
+                                            <span class="toggle-slider" aria-hidden="true"></span>
+                                        </span>
+                                        <label for="enableBreakout" class="with-tooltip">
+                                            Enable Breakout Sequence
+                                            <button type="button" class="tooltip-icon" aria-label="Help for Breakout Sequence" aria-describedby="enableBreakout-tooltip">?</button>
+                                            <span class="tooltip-content" id="enableBreakout-tooltip" role="tooltip">Allows technicians to exit kiosk mode using a key combination. Useful for troubleshooting without rebooting. The user will be taken to the Windows lock screen.</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            <div id="breakoutConfig" class="hidden" aria-hidden="true">
+                                <div class="form-group">
+                                    <label id="breakoutKey-label" class="with-tooltip">
+                                        Key Combination
+                                        <button type="button" class="tooltip-icon" aria-label="Help for Key Combination" aria-describedby="breakoutKey-tooltip">?</button>
+                                        <span class="tooltip-content" id="breakoutKey-tooltip" role="tooltip">The key combination to exit kiosk mode. Choose modifier keys and a final key. Avoid common shortcuts like Ctrl+C or Ctrl+V. Something obscure like Ctrl+Alt+K works well.</span>
+                                    </label>
+                                    <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;" role="group" aria-labelledby="breakoutKey-label">
+                                        <label style="display: flex; align-items: center; gap: 4px; font-weight: normal;">
+                                            <input type="checkbox" id="breakoutCtrl" checked data-change="updateBreakoutPreview|updatePreview"> Ctrl
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 4px; font-weight: normal;">
+                                            <input type="checkbox" id="breakoutAlt" checked data-change="updateBreakoutPreview|updatePreview"> Alt
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 4px; font-weight: normal;">
+                                            <input type="checkbox" id="breakoutShift" data-change="updateBreakoutPreview|updatePreview"> Shift
+                                        </label>
+                                        <span aria-hidden="true">+</span>
+                                        <label for="breakoutFinalKey" class="sr-only">Final key</label>
+                                        <select id="breakoutFinalKey" data-change="updateBreakoutPreview|updatePreview" style="width: auto;">
+                                            <option value="A">A</option>
+                                            <option value="B">B</option>
+                                            <option value="C">C</option>
+                                            <option value="D">D</option>
+                                            <option value="E">E</option>
+                                            <option value="F">F</option>
+                                            <option value="G">G</option>
+                                            <option value="H">H</option>
+                                            <option value="I">I</option>
+                                            <option value="J">J</option>
+                                            <option value="K" selected>K</option>
+                                            <option value="L">L</option>
+                                            <option value="M">M</option>
+                                            <option value="N">N</option>
+                                            <option value="O">O</option>
+                                            <option value="P">P</option>
+                                            <option value="Q">Q</option>
+                                            <option value="R">R</option>
+                                            <option value="S">S</option>
+                                            <option value="T">T</option>
+                                            <option value="U">U</option>
+                                            <option value="V">V</option>
+                                            <option value="W">W</option>
+                                            <option value="X">X</option>
+                                            <option value="Y">Y</option>
+                                            <option value="Z">Z</option>
+                                            <option value="0">0</option>
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                            <option value="6">6</option>
+                                            <option value="7">7</option>
+                                            <option value="8">8</option>
+                                            <option value="9">9</option>
+                                            <option value="F1">F1</option>
+                                            <option value="F2">F2</option>
+                                            <option value="F3">F3</option>
+                                            <option value="F4">F4</option>
+                                            <option value="F5">F5</option>
+                                            <option value="F6">F6</option>
+                                            <option value="F7">F7</option>
+                                            <option value="F8">F8</option>
+                                            <option value="F9">F9</option>
+                                            <option value="F10">F10</option>
+                                            <option value="F11">F11</option>
+                                            <option value="F12">F12</option>
+                                        </select>
+                                    </div>
+                                    <p class="hint" style="margin-top: 8px;">
+                                        Current: <strong id="breakoutPreview" aria-live="polite">Ctrl+Alt+K</strong>
+                                    </p>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <!-- Multi-App Configuration -->
+                <div id="multiAppConfig" class="hidden" aria-hidden="true">
+                    <fieldset class="section">
+                        <legend class="section-header" data-section-key="allowedApplications"></legend>
+                        <div class="section-content">
+                            <div class="sub-panel">
+                            <div class="sub-panel-title">ADD APPLICATION</div>
+                            <div class="form-group">
+                                <label id="addApp-label" class="with-tooltip">
+                                    Add Application
+                                    <button type="button" class="tooltip-icon" aria-label="Help for Add Application" aria-describedby="addApp-tooltip">?</button>
+                                    <span class="tooltip-content" id="addApp-tooltip" role="tooltip">Add apps that users can access in multi-app kiosk mode. Path: Full path to .exe file for Win32 apps. AUMID: App User Model ID for UWP/Store apps. Run Get-StartApps in PowerShell to find these.</span>
+                                </label>
+                                <div class="input-group" role="group" aria-labelledby="addApp-label">
+                                    <label for="addAppType" class="sr-only">Application type</label>
+                                    <select id="addAppType" style="width: 150px;">
+                                        <option value="path">Path (.exe)</option>
+                                        <option value="aumid">AUMID (UWP)</option>
+                                    </select>
+                                    <label for="addAppValue" class="sr-only">Application path or AUMID</label>
+                                    <input type="text" id="addAppValue" placeholder="Path or AUMID">
+                                    <button type="button" class="btn-primary" data-action="addApp">Add</button>
+                                </div>
+                            </div>
+                            </div>
+
+                            <div class="sub-panel">
+                            <div class="sub-panel-title">COMMON APPS</div>
+                            <div class="form-group">
+                                <label id="commonApps-label" class="with-tooltip">
+                                    Common Apps
+                                    <button type="button" class="tooltip-icon" aria-label="Help for Common Apps" aria-describedby="commonApps-tooltip">?</button>
+                                    <span class="tooltip-content" id="commonApps-tooltip" role="tooltip">Quick-add frequently needed apps. Edge includes all required components (msedge.exe, proxy, AUMID). Touch Keyboard (TabTip.exe) or On-Screen Keyboard (osk.exe) are useful for touchscreen kiosks.</span>
+                                </label>
+                                <p class="hint" style="margin-bottom: 8px;">
+                                    <strong>NOTE:</strong> Common apps use default installation paths. If an app is installed in a custom location, use "Add Application" above instead.
+                                </p>
+                                <div style="margin-bottom: 8px;">
+                                    <input type="search" id="commonAppSearch" placeholder="Filter apps..." class="btn-small" style="width: 100%;" data-config-skip="true">
+                                </div>
+                                <div role="group" aria-labelledby="commonApps-label">
+                                    <div class="common-app-category" style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
+                                        <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">Browsers:</strong>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="edge">Edge</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="chrome">Chrome</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="firefox">Firefox</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="brave">Brave</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="island">Island</button>
+                                    </div>
+                                    <div class="common-app-category" style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
+                                        <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">System Utilities:</strong>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="osk">On-Screen Keyboard</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="touchKeyboard">Touch Keyboard</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="volume">Volume Control</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="settings">Settings</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="fileExplorer">File Explorer</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="printers">Printers</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="printSpooler">Print Spooler</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="controlPanel">Control Panel</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="cmd">Command Prompt</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="powershell">PowerShell 5.x</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="powershell7">PowerShell 7.x</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="terminal">Windows Terminal</button>
+                                    </div>
+                                    <div class="common-app-category" style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
+                                        <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">Productivity:</strong>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="calculator">Calculator</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="notepad">Notepad</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="paint">Paint</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="snipSketch">Snipping Tool</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="stickyNotes">Sticky Notes</button>
+                                    </div>
+                                    <div class="common-app-category" style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
+                                        <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">Media &amp; Communication:</strong>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="photos">Photos</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="camera">Camera</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="movies">Movies &amp; TV</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="teams">Teams</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="zoom">Zoom</button>
+                                    </div>
+                                    <div class="common-app-category" style="display: flex; gap: 5px; flex-wrap: wrap;">
+                                        <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">Microsoft Office:</strong>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="word">Word</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="excel">Excel</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="powerpoint">PowerPoint</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="outlook">Outlook</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="onenote">OneNote</button>
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+
+                            <div class="sub-panel">
+                            <div class="sub-panel-title">ALLOWED APPS LIST</div>
+                            <div class="form-group">
+                                <label id="appList-label">Allowed Apps (<span id="appCount" aria-live="polite">0</span>)</label>
+                                <div class="app-list" id="appList" role="list" aria-labelledby="appList-label" aria-live="polite">
+                                    <div class="empty-list" role="listitem">No apps added yet. Use "Add Common App" above to get started.</div>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="section">
+                        <legend class="section-header" data-section-key="autoLaunch"></legend>
+                        <div class="section-content">
+                            <div class="sub-panel">
+                            <div class="sub-panel-title">AUTO-LAUNCH</div>
+                            <div class="form-group">
+                                <label for="autoLaunchApp" class="with-tooltip">
+                                    Launch on Startup
+                                    <button type="button" class="tooltip-icon" aria-label="Help for Auto-Launch" aria-describedby="autoLaunch-tooltip">?</button>
+                                    <span class="tooltip-content" id="autoLaunch-tooltip" role="tooltip">Automatically launch this app when the kiosk user signs in. The app will start immediately, providing a single-app experience while still allowing access to other whitelisted apps.</span>
+                                </label>
+                                <select id="autoLaunchApp" data-change="updateAutoLaunchSelection|updatePreview" aria-describedby="autoLaunch-tooltip">
+                                    <option value="">None (show Start menu)</option>
+                                </select>
+                            </div>
+                            <div id="sentryOptions" class="hidden">
+                                <div class="form-group">
+                                    <div class="checkbox-group">
+                                        <span class="toggle-switch">
+                                            <input type="checkbox" role="switch" id="enableSentry" data-change="updateSentryUI|updatePreview">
+                                            <span class="toggle-slider" aria-hidden="true"></span>
+                                        </span>
+                                        <label for="enableSentry" class="with-tooltip">
+                                            Relaunch if Closed <span class="badge-script">Script Only</span>
+                                            <button type="button" class="tooltip-icon" aria-label="Help for App Sentry" aria-describedby="sentry-tooltip">?</button>
+                                            <span class="tooltip-content" id="sentry-tooltip" role="tooltip">Creates a Windows Scheduled Task that monitors the auto-launch app process. If the app is closed (e.g., by an Intune idle timeout policy), it is automatically relaunched with the configured arguments.</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div id="sentryIntervalGroup" class="hidden">
+                                    <div class="form-group">
+                                        <label for="sentryInterval" class="with-tooltip">
+                                            Poll Interval (seconds)
+                                            <button type="button" class="tooltip-icon" aria-label="Help for Poll Interval" aria-describedby="sentryInterval-tooltip">?</button>
+                                            <span class="tooltip-content" id="sentryInterval-tooltip" role="tooltip">How frequently the sentry checks if the app is running. Lower values mean faster relaunch but slightly more CPU usage. A 10-second cooldown prevents restart loops regardless of this setting.</span>
+                                        </label>
+                                        <input type="number" id="sentryInterval" value="10" min="5" step="1">
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="section hidden" id="multiAppEdgeConfig" aria-hidden="true">
+                        <legend class="section-header" data-section-key="edgeKiosk"></legend>
+                        <div class="section-content">
+                            <div class="sub-panel">
+                            <div class="sub-panel-title">EDGE AUTO-LAUNCH</div>
+                            <div class="form-group">
+                                <label for="multiEdgeSourceType" class="with-tooltip">
+                                    URL Source
+                                    <button type="button" class="tooltip-icon" aria-label="Help for URL Source" aria-describedby="multiEdgeSource-tooltip">?</button>
+                                    <span class="tooltip-content" id="multiEdgeSource-tooltip" role="tooltip">Choose whether Edge should open a web URL or a local HTML file when auto-launched.</span>
+                                </label>
+                                <select id="multiEdgeSourceType" data-change="updateMultiEdgeSourceUI|updatePreview" aria-describedby="multiEdgeSource-tooltip">
+                                    <option value="url">Web URL</option>
+                                    <option value="file">Local File (file:// URL)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group" id="multiEdgeUrlGroup">
+                                <label for="multiEdgeUrl" class="with-tooltip">
+                                    Kiosk URL
+                                    <button type="button" class="tooltip-icon" aria-label="Help for Kiosk URL" aria-describedby="multiEdgeUrl-tooltip">?</button>
+                                    <span class="tooltip-content" id="multiEdgeUrl-tooltip" role="tooltip">The URL that Edge will open in kiosk mode. This is your landing page where you can provide links to whitelisted utilities.</span>
+                                </label>
+                                <input type="text" id="multiEdgeUrl" placeholder="https://example.com" data-change="updatePreview" aria-describedby="multiEdgeUrl-tooltip">
+                            </div>
+
+                            <div class="form-group hidden" id="multiEdgeFileGroup" aria-hidden="true">
+                                <label for="multiEdgeFilePath" class="with-tooltip">
+                                    Local File Path
+                                    <button type="button" class="tooltip-icon" aria-label="Help for Local File Path" aria-describedby="multiEdgeFile-tooltip">?</button>
+                                    <span class="tooltip-content" id="multiEdgeFile-tooltip" role="tooltip">Path to a local HTML file (e.g., C:\Kiosk\index.html). The path will be converted to a file:// URL.</span>
+                                </label>
+                                <input type="text" id="multiEdgeFilePath" placeholder="C:\Kiosk\index.html" data-change="updatePreview" aria-describedby="multiEdgeFile-tooltip">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="multiEdgeKioskType" class="with-tooltip">
+                                    Kiosk Mode Type
+                                    <button type="button" class="tooltip-icon" aria-label="Help for Kiosk Mode Type" aria-describedby="multiEdgeKiosk-tooltip">?</button>
+                                    <span class="tooltip-content" id="multiEdgeKiosk-tooltip" role="tooltip">Fullscreen: No browser UI, just the web content. Public Browsing: Shows address bar and navigation for controlled browsing. Both modes always run InPrivate (no history/cookies saved).</span>
+                                </label>
+                                <select id="multiEdgeKioskType" data-change="updatePreview" aria-describedby="multiEdgeKiosk-tooltip">
+                                    <option value="fullscreen">Fullscreen (no browser UI)</option>
+                                    <option value="public-browsing">Public Browsing (with navigation)</option>
+                                </select>
+                            </div>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="section hidden" id="win32ArgsConfig" aria-hidden="true">
+                        <legend class="section-header" data-section-key="win32Args"></legend>
+                        <div class="section-content">
+                            <div class="form-group">
+                                <label for="win32AutoLaunchArgs" class="with-tooltip">
+                                    Launch Arguments
+                                    <button type="button" class="tooltip-icon" aria-label="Help for Launch Arguments" aria-describedby="multiWin32Args-tooltip">?</button>
+                                    <span class="tooltip-content" id="multiWin32Args-tooltip" role="tooltip">Optional command-line arguments to pass to the Win32 application when it auto-launches. Example: --fullscreen or /silent</span>
+                                </label>
+                                <input type="text" id="win32AutoLaunchArgs" placeholder="--fullscreen /silent" data-change="updatePreview" aria-describedby="multiWin32Args-tooltip">
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <fieldset class="section" id="fileExplorerSection">
+                    <legend class="section-header" data-section-key="fileExplorerControls"></legend>
+                    <div class="section-content">
+                        <div class="sub-panel">
+                        <div class="sub-panel-title">FILE EXPLORER</div>
+                        <div class="form-group">
+                            <label for="fileExplorerAccess" class="with-tooltip">
+                                File Explorer Access
+                                <button type="button" class="tooltip-icon" aria-label="Help for File Explorer Access" aria-describedby="fileExplorerAccess-tooltip">?</button>
+                                <span class="tooltip-content" id="fileExplorerAccess-tooltip" role="tooltip">No Access: File Explorer is blocked. Downloads Only: Access to Downloads folder. Removable Drives: Access to USB drives. Downloads + Removable: Both options. No Restriction: Full file system access.</span>
+                            </label>
+                            <select id="fileExplorerAccess" data-change="updatePreview" aria-describedby="fileExplorerAccess-tooltip">
+                                <option value="none">No Access (Blocked)</option>
+                                <option value="downloads">Downloads Folder Only</option>
+                                <option value="removable">Removable Drives Only</option>
+                                <option value="downloads-removable">Downloads + Removable Drives</option>
+                                <option value="all">No Restriction (All Locations)</option>
+                            </select>
+                        </div>
+                        </div>
+                    </div>
+                </fieldset>
+                    </div>
+                    <!-- End Applications Tab -->
+
+                    <!-- Layout Tab (Multi-App only) -->
+                    <div class="tab-content" role="tabpanel" id="tab-layout" aria-labelledby="tab-btn-layout">
+                <fieldset class="section">
+                    <legend class="section-header" data-section-key="taskbarControls"></legend>
+                    <div class="section-content">
+                        <div class="sub-panel">
+                        <div class="sub-panel-title">TASKBAR</div>
+                        <div class="form-group">
+                            <div class="checkbox-group">
+                                <span class="toggle-switch">
+                                    <input type="checkbox" role="switch" id="showTaskbar" checked data-change="updatePreview" aria-describedby="showTaskbar-tooltip">
+                                    <span class="toggle-slider" aria-hidden="true"></span>
+                                </span>
+                                <label for="showTaskbar" class="with-tooltip">
+                                    Show Taskbar
+                                    <button type="button" class="tooltip-icon" aria-label="Help for Show Taskbar" aria-describedby="showTaskbar-tooltip">?</button>
+                                    <span class="tooltip-content" id="showTaskbar-tooltip" role="tooltip">When enabled, users see the Windows taskbar with Start button and running apps. Disable for a more locked-down experience where users can only access apps via the Start menu.</span>
+                                </label>
+                            </div>
+                            <div class="checkbox-group">
+                                <span class="toggle-switch">
+                                    <input type="checkbox" role="switch" id="replaceTaskbarPins" checked data-change="updatePreview" aria-describedby="replaceTaskbarPins-tooltip">
+                                    <span class="toggle-slider" aria-hidden="true"></span>
+                                </span>
+                                <label for="replaceTaskbarPins" class="with-tooltip">
+                                    Replace Default Taskbar Pins
+                                    <button type="button" class="tooltip-icon" aria-label="Help for Replace Default Taskbar Pins" aria-describedby="replaceTaskbarPins-tooltip">?</button>
+                                    <span class="tooltip-content" id="replaceTaskbarPins-tooltip" role="tooltip">When enabled, the default Windows taskbar pins (Edge, File Explorer, Store) are removed and only the pins you configure below are shown. When disabled, your pins are appended after the default pins.</span>
+                                </label>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                </fieldset>
+                    <fieldset class="section">
+                        <legend class="section-header collapsible-header" data-section-key="startMenuPins" aria-expanded="true"></legend>
+                        <div class="section-content collapsible-content">
+                            <div class="sub-panel">
+                            <div class="sub-panel-title">PINNED SHORTCUTS</div>
+                            <div class="form-group">
+                                <label class="with-tooltip">
+                                    Add Start Menu Shortcut
+                                    <button type="button" class="tooltip-icon" aria-label="Help for Add Shortcut" aria-describedby="addShortcut-tooltip">?</button>
+                                    <span class="tooltip-content" id="addShortcut-tooltip" role="tooltip">Pins an allowed app to the Start menu. Select an app, optionally edit the name, and add it. Edge shortcuts may ignore custom name/icon; use Edge secondary tiles for site-specific names.</span>
+                                </label>
+                                <div style="display: flex; flex-direction: column; gap: 8px; padding: 10px; background: var(--bg-tertiary); border-radius: var(--frame-radius);">
+                                    <div>
+                                        <label for="pinTargetPreset" style="font-size: 0.75rem; color: var(--text-secondary);">Allowed App *</label>
+                                        <select id="pinTargetPreset" data-change="applyPinTargetPreset" style="width: 100%;">
+                                            <option value="">Select an allowed app</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="pinName" style="font-size: 0.75rem; color: var(--text-secondary);">Shortcut Name *</label>
+                                        <input type="text" id="pinName" placeholder="Auto-filled from app selection" style="width: 100%;">
+                                    </div>
+                                    <input type="hidden" id="pinTarget">
+                                    <details class="pin-advanced-options">
+                                        <summary class="btn-secondary btn-small">Advanced Options</summary>
+                                        <div class="pin-advanced-body">
+                                    <div>
+                                        <label for="pinArgs" style="font-size: 0.75rem; color: var(--text-secondary);">Arguments (optional)</label>
+                                        <input type="text" id="pinArgs" placeholder="e.g., --kiosk https://example.com --edge-kiosk-type=fullscreen" style="width: 100%;">
+                                    </div>
+                                    <div id="pinEdgeArgsGroup" class="edge-args-group hidden" aria-hidden="true">
+                                        <button type="button" class="btn-secondary btn-small" data-action="openEdgeArgsModal" data-arg="pin">Configure Kiosk Mode...</button>
+                                    </div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <div style="flex: 1;">
+                                            <label for="pinWorkingDir" style="font-size: 0.75rem; color: var(--text-secondary);">Working Directory (optional)</label>
+                                            <input type="text" id="pinWorkingDir" placeholder="e.g., C:\Program Files (x86)\Microsoft\Edge\Application" style="width: 100%;">
+                                        </div>
+                                        <div style="flex: 1;">
+                                            <label for="pinIconPath" style="font-size: 0.75rem; color: var(--text-secondary);">Icon Path (optional)</label>
+                                            <input type="text" id="pinIconPath" placeholder="e.g., C:\path\to\icon.ico" style="width: 100%;">
+                                        </div>
+                                    </div>
+                                        </div>
+                                    </details>
+                                    <button type="button" class="btn-primary" data-action="addPin" style="align-self: flex-start;">Add Shortcut</button>
+                                </div>
+                            </div>
+                            </div>
+
+                            <div class="sub-panel">
+                            <div class="sub-panel-title">EDGE SITE TILE</div>
+                            <div class="form-group">
+                                <label class="with-tooltip">
+                                    Edge Site Tile (Secondary Tile)
+                                    <button type="button" class="tooltip-icon" aria-label="Help for Edge Site Tile" aria-describedby="edgeTile-tooltip">?</button>
+                                    <span class="tooltip-content" id="edgeTile-tooltip" role="tooltip">Creates an Edge site tile with a custom name. The icon always comes from Edge and can’t be overridden.</span>
+                                </label>
+                                <div style="display: flex; flex-direction: column; gap: 8px; padding: 10px; background: var(--bg-tertiary); border-radius: var(--frame-radius);">
+                                    <div style="display: flex; gap: 8px;">
+                                        <div style="flex: 1;">
+                                            <label for="edgeTileName" style="font-size: 0.75rem; color: var(--text-secondary);">Tile Name *</label>
+                                            <input type="text" id="edgeTileName" placeholder="e.g., Company Portal" style="width: 100%;">
+                                        </div>
+                                        <div style="flex: 1;">
+                                            <label for="edgeTileId" style="font-size: 0.75rem; color: var(--text-secondary);">Tile ID (optional)</label>
+                                            <input type="text" id="edgeTileId" placeholder="e.g., CompanyPortal" style="width: 100%;">
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; gap: 8px; align-items: center;">
+                                        <div style="min-width: 140px;">
+                                            <label for="edgeTileSourceType" style="font-size: 0.75rem; color: var(--text-secondary);">Content Source</label>
+                                            <select id="edgeTileSourceType" data-change="updateEdgeTileSourceUI" style="width: 100%;">
+                                                <option value="url">Web URL</option>
+                                                <option value="file">Local File</option>
+                                            </select>
+                                        </div>
+                                        <div id="edgeTileUrlConfig" style="flex: 1;">
+                                            <input type="text" id="edgeTileUrl" placeholder="https://example.com" style="width: 100%;">
+                                        </div>
+                                        <div id="edgeTileFileConfig" class="hidden" style="flex: 1;" aria-hidden="true">
+                                            <input type="text" id="edgeTileFilePath" placeholder="C:\\Kiosk\\index.html" style="width: 100%;">
+                                        </div>
+                                    </div>
+                                    <div style="font-size: 0.7rem; color: var(--text-secondary); font-style: italic;">
+                                        NOTE: Secondary tiles use the normal Edge profile (not InPrivate by default). Apply Edge policies if you need private-session behavior.
+                                    </div>
+                                    <button type="button" class="btn-primary" data-action="addEdgeSecondaryTile" style="align-self: flex-start;">Add Edge Site Tile</button>
+                                </div>
+                            </div>
+                            </div>
+
+                            <div class="sub-panel">
+                            <div class="sub-panel-title">PIN LIST</div>
+                            <div class="form-group">
+                                <label id="pinList-label">Pinned Shortcuts (<span id="pinCount" aria-live="polite">0</span>)</label>
+                                <div class="app-list" id="pinList" role="list" aria-labelledby="pinList-label" aria-live="polite">
+                                    <div class="empty-list" role="listitem">No pins added yet. Add a desktop shortcut or UWP app above.</div>
+                                </div>
+                            </div>
+                            </div>
+
+                            <div id="pinEditPanel" class="sub-panel hidden" aria-live="polite">
+                                <div class="sub-panel-title">EDIT PIN</div>
+                                <label>Edit Pin <span id="editPinType" style="font-weight: 400; color: var(--text-secondary);"></span></label>
+                                <div style="display: flex; flex-direction: column; gap: 10px; padding: 12px; background: var(--bg-tertiary); border-radius: var(--frame-radius);">
+                                    <div>
+                                        <label for="editPinName" style="font-size: 0.75rem; color: var(--text-secondary);">Name *</label>
+                                        <input type="text" id="editPinName" style="width: 100%;">
+                                    </div>
+                                    <div id="editDesktopFields">
+                                        <div style="display: flex; gap: 8px;">
+                                            <div style="flex: 2;">
+                                                <label for="editPinTarget" style="font-size: 0.75rem; color: var(--text-secondary);">Target Path</label>
+                                                <input type="text" id="editPinTarget" style="width: 100%;">
+                                            </div>
+                                            <div style="flex: 1;">
+                                                <label for="editPinArgs" style="font-size: 0.75rem; color: var(--text-secondary);">Arguments</label>
+                                                <input type="text" id="editPinArgs" style="width: 100%;">
+                                            </div>
+                                        </div>
+                                        <div id="editPinEdgeArgsGroup" class="edge-args-group hidden" aria-hidden="true" style="margin-top: 8px;">
+                                            <button type="button" class="btn-secondary btn-small" data-action="openEdgeArgsModal" data-arg="editPin">Configure Kiosk Mode...</button>
+                                        </div>
+                                        <div style="display: flex; gap: 8px; margin-top: 8px;">
+                                            <div style="flex: 1;">
+                                                <label for="editPinWorkingDir" style="font-size: 0.75rem; color: var(--text-secondary);">Working Directory</label>
+                                                <input type="text" id="editPinWorkingDir" style="width: 100%;">
+                                            </div>
+                                            <div style="flex: 1;">
+                                                <label for="editPinIconPath" style="font-size: 0.75rem; color: var(--text-secondary);">Icon Path</label>
+                                                <input type="text" id="editPinIconPath" style="width: 100%;">
+                                            </div>
+                                        </div>
+                                        <div style="margin-top: 8px;">
+                                            <label for="editPinShortcutPath" style="font-size: 0.75rem; color: var(--text-secondary);">System Shortcut Path (optional)</label>
+                                            <input type="text" id="editPinShortcutPath" style="width: 100%;" placeholder="e.g. %ProgramData%\Microsoft\Windows\Start Menu\Programs\MyApp.lnk" title="Path to an existing .lnk shortcut file on the system. Use this instead of Target Path to reference a pre-existing Start Menu shortcut.">
+                                        </div>
+                                    </div>
+                                    <div id="editPackagedFields" class="hidden">
+                                        <label for="editPinPackagedAppId" style="font-size: 0.75rem; color: var(--text-secondary);">Packaged App ID</label>
+                                        <input type="text" id="editPinPackagedAppId" style="width: 100%;">
+                                    </div>
+                                    <div id="editSecondaryFields" class="hidden">
+                                        <div style="display: flex; gap: 8px;">
+                                            <div style="flex: 1;">
+                                                <label for="editTileId" style="font-size: 0.75rem; color: var(--text-secondary);">Tile ID</label>
+                                                <input type="text" id="editTileId" style="width: 100%;">
+                                            </div>
+                                            <div style="flex: 2;">
+                                                <label for="editTileUrl" style="font-size: 0.75rem; color: var(--text-secondary);">URL or file path</label>
+                                                <input type="text" id="editTileUrl" style="width: 100%;">
+                                            </div>
+                                        </div>
+                                        <div style="margin-top: 8px;">
+                                            <label for="editTilePackagedAppId" style="font-size: 0.75rem; color: var(--text-secondary);">Edge Packaged App ID</label>
+                                            <input type="text" id="editTilePackagedAppId" style="width: 100%;">
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button type="button" class="btn-primary btn-small" data-action="saveEditPin">Save Changes</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="cancelEditPin">Cancel</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <!-- Taskbar Pins Section -->
+                    <fieldset class="section">
+                        <legend class="section-header collapsible-header" data-section-key="taskbarLayout" aria-expanded="true"></legend>
+                        <div class="section-content collapsible-content">
+                            <div class="sub-panel">
+                            <div class="sub-panel-title">TASKBAR PINS</div>
+                            <div class="form-group">
+                                <label class="with-tooltip">
+                                    Add Taskbar Pin
+                                    <button type="button" class="tooltip-icon" aria-label="Help for Taskbar Pins" aria-describedby="taskbarPins-tooltip">?</button>
+                                    <span class="tooltip-content" id="taskbarPins-tooltip" role="tooltip">Pins apps to the taskbar for quick access. If you set an icon path, that file must exist on the device.</span>
+                                </label>
+                                <div style="display: flex; flex-direction: column; gap: 8px; padding: 10px; background: var(--bg-tertiary); border-radius: var(--frame-radius);">
+                                    <div>
+                                        <label for="taskbarPinTargetPreset" style="font-size: 0.75rem; color: var(--text-secondary);">Allowed App *</label>
+                                        <select id="taskbarPinTargetPreset" data-change="applyTaskbarPinTargetPreset" style="width: 100%;">
+                                            <option value="">Select an allowed app</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="taskbarPinName" style="font-size: 0.75rem; color: var(--text-secondary);">Name *</label>
+                                        <input type="text" id="taskbarPinName" placeholder="Auto-filled from app selection" style="width: 100%;">
+                                    </div>
+                                    <input type="hidden" id="taskbarPinType" value="desktopAppLink">
+                                    <input type="hidden" id="taskbarPinTarget">
+                                    <input type="hidden" id="taskbarPinValue">
+                                    <div id="taskbarPackagedFields" class="hidden" aria-hidden="true"></div>
+                                    <div id="taskbarDesktopFields">
+                                        <details class="pin-advanced-options">
+                                            <summary class="btn-secondary btn-small">Advanced Options</summary>
+                                            <div class="pin-advanced-body">
+                                            <div>
+                                                <label for="taskbarPinArgs" style="font-size: 0.75rem; color: var(--text-secondary);">Arguments</label>
+                                                <input type="text" id="taskbarPinArgs" placeholder="--kiosk https://example.com" style="width: 100%;">
+                                            </div>
+                                            <div>
+                                                <label for="taskbarPinWorkingDir" style="font-size: 0.75rem; color: var(--text-secondary);">Working Directory</label>
+                                                <input type="text" id="taskbarPinWorkingDir" placeholder="C:\\Program Files\\Microsoft\\Edge\\Application" style="width: 100%;">
+                                            </div>
+                                            <div>
+                                                <label for="taskbarPinIconPath" style="font-size: 0.75rem; color: var(--text-secondary);">Icon Path (optional, shortcuts only)</label>
+                                                <input type="text" id="taskbarPinIconPath" placeholder="C:\\path\\to\\icon.ico" style="width: 100%;">
+                                            </div>
+                                        <div id="taskbarPinEdgeArgsGroup" class="edge-args-group hidden" aria-hidden="true" style="margin-top: 8px;">
+                                            <button type="button" class="btn-secondary btn-small" data-action="openEdgeArgsModal" data-arg="taskbarPin">Configure Kiosk Mode...</button>
+                                        </div>
+                                            </div>
+                                        </details>
+                                    </div>
+                                    <button type="button" class="btn-primary" data-action="addTaskbarPin" style="align-self: flex-start;">Add Taskbar Pin</button>
+                                </div>
+                            </div>
+                            </div>
+
+                            <div class="sub-panel">
+                            <div class="sub-panel-title">TASKBAR LIST</div>
+                            <div class="form-group">
+                                <label id="taskbarPinList-label">Taskbar Pins (<span id="taskbarPinCount" aria-live="polite">0</span>)</label>
+                                <div class="app-list" id="taskbarPinList" role="list" aria-labelledby="taskbarPinList-label" aria-live="polite">
+                                    <div class="empty-list" role="listitem">No taskbar pins configured. Add a desktop app or UWP app above.</div>
+                                </div>
+                            </div>
+                            </div>
+
+                            <div id="taskbarEditPanel" class="sub-panel hidden" aria-live="polite">
+                                <div class="sub-panel-title">EDIT TASKBAR PIN</div>
+                                <label>Edit Taskbar Pin</label>
+                                <div style="display: flex; flex-direction: column; gap: 10px; padding: 12px; background: var(--bg-tertiary); border-radius: var(--frame-radius);">
+                                    <div style="display: flex; gap: 8px;">
+                                        <div style="flex: 1;">
+                                            <label for="editTaskbarPinName" style="font-size: 0.75rem; color: var(--text-secondary);">Name *</label>
+                                            <input type="text" id="editTaskbarPinName" style="width: 100%;">
+                                        </div>
+                                        <div style="width: 180px;">
+                                            <label for="editTaskbarPinType" style="font-size: 0.75rem; color: var(--text-secondary);">Type</label>
+                                            <select id="editTaskbarPinType" data-change="updateEditTaskbarPinTypeUI" style="width: 100%;">
+                                                <option value="desktopAppLink">Desktop App (Target Path)</option>
+                                                <option value="packagedAppId">Packaged App ID</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div id="editTaskbarPackagedFields" class="hidden" aria-hidden="true">
+                                        <label for="editTaskbarPinValue" style="font-size: 0.75rem; color: var(--text-secondary);">Packaged App ID *</label>
+                                        <input type="text" id="editTaskbarPinValue" style="width: 100%;">
+                                    </div>
+                                    <div id="editTaskbarDesktopFields">
+                                        <div style="display: flex; gap: 8px;">
+                                            <div style="flex: 2;">
+                                                <label for="editTaskbarPinTarget" style="font-size: 0.75rem; color: var(--text-secondary);">Target Path *</label>
+                                                <input type="text" id="editTaskbarPinTarget" style="width: 100%;">
+                                            </div>
+                                            <div style="flex: 1;">
+                                                <label for="editTaskbarPinArgs" style="font-size: 0.75rem; color: var(--text-secondary);">Arguments</label>
+                                                <input type="text" id="editTaskbarPinArgs" style="width: 100%;">
+                                            </div>
+                                        </div>
+                                        <div style="margin-top: 8px;">
+                                            <label for="editTaskbarPinWorkingDir" style="font-size: 0.75rem; color: var(--text-secondary);">Working Directory</label>
+                                            <input type="text" id="editTaskbarPinWorkingDir" style="width: 100%;">
+                                        </div>
+                                        <div style="margin-top: 8px;">
+                                            <label for="editTaskbarPinIconPath" style="font-size: 0.75rem; color: var(--text-secondary);">Icon Path (optional, shortcuts only)</label>
+                                            <input type="text" id="editTaskbarPinIconPath" style="width: 100%;">
+                                        </div>
+                                        <div id="editTaskbarEdgeArgsGroup" class="edge-args-group hidden" aria-hidden="true" style="margin-top: 8px;">
+                                            <button type="button" class="btn-secondary btn-small" data-action="openEdgeArgsModal" data-arg="editTaskbar">Configure Kiosk Mode...</button>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button type="button" class="btn-primary btn-small" data-action="saveTaskbarPin">Save Changes</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="cancelTaskbarPinEdit">Cancel</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    </div>
+                    <!-- End Layout Tab -->
+
+                    <!-- Account & Identity Tab -->
+                    <div class="tab-content" role="tabpanel" id="tab-account" aria-labelledby="tab-btn-account">
+                <!-- Profile Configuration -->
+                <fieldset class="section">
+                    <legend class="section-header" data-section-key="profile"></legend>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label for="configName" class="with-tooltip">
+                                Configuration Name
+                                <button type="button" class="tooltip-icon" aria-label="Help for Configuration Name" aria-describedby="configName-tooltip">?</button>
+                                <span class="tooltip-content" id="configName-tooltip" role="tooltip">A friendly name for this configuration. Used in downloaded file names (e.g., "Lobby-Kiosk" becomes "AssignedAccess-Lobby-Kiosk.xml"). Leave blank for default naming.</span>
+                            </label>
+                            <input type="text" id="configName" placeholder="e.g., Lobby-Kiosk, Reception-PC" data-change="updatePreview" aria-describedby="configName-tooltip">
+                        </div>
+                        <div class="form-group" style="margin-top: 8px;">
+                            <label for="configAuthor" style="font-size: 0.85rem; color: var(--text-secondary);">Author (optional)</label>
+                            <input type="text" id="configAuthor" placeholder="e.g., John Smith">
+                        </div>
+                        <div class="form-group">
+                            <label for="profileId" class="with-tooltip">
+                                Profile GUID
+                                <button type="button" class="tooltip-icon" aria-label="Help for Profile GUID" aria-describedby="profileId-tooltip">?</button>
+                                <span class="tooltip-content" id="profileId-tooltip" role="tooltip">A unique identifier for this kiosk profile. Each profile needs its own GUID. Click "Generate" to create a random one. This ID links the profile configuration to the account that will use it.</span>
+                            </label>
+                            <div class="input-group">
+                                <input type="text" id="profileId" placeholder="{XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}" data-change="updatePreview" aria-describedby="profileId-tooltip">
+                                <button type="button" class="btn-secondary" data-action="generateGuid">Generate</button>
+                                <button type="button" class="btn-secondary btn-small" data-action="copyProfileId" aria-label="Copy Profile GUID to clipboard">
+                                    <span aria-hidden="true">COPY GUID</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- Account Configuration -->
+                <fieldset class="section">
+                    <legend class="section-header" data-section-key="account"></legend>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label id="account-type-label" class="with-tooltip">
+                                Account Type
+                                <button type="button" class="tooltip-icon" aria-label="Help for Account Type" aria-describedby="accountType-tooltip">?</button>
+                                <span class="tooltip-content" id="accountType-tooltip" role="tooltip"><strong>Auto Logon:</strong> Windows creates and manages a local account automatically. Best for most kiosks - no password needed, auto-logs in at boot.<br><br><strong>Existing Account:</strong> Use a pre-created local, domain, or Azure AD account. Use this if you need specific permissions or domain integration.</span>
+                            </label>
+                            <div class="toggle-group" role="group" aria-labelledby="account-type-label" id="accountTypeButtons">
+                                <button type="button" id="accountAuto" class="active" data-action="setAccountType" data-arg="auto" aria-pressed="true">Auto Logon (Managed)</button>
+                                <button type="button" id="accountExisting" data-action="setAccountType" data-arg="existing" aria-pressed="false">Existing Account</button>
+                                <button type="button" id="accountGroup" class="hidden" data-action="setAccountType" data-arg="group" aria-pressed="false">User Group</button>
+                                <button type="button" id="accountGlobal" class="hidden" data-action="setAccountType" data-arg="global" aria-pressed="false">Global Profile</button>
+                            </div>
+                        </div>
+
+                        <div id="autoLogonConfig">
+                            <div class="form-group">
+                                <label for="displayName" class="with-tooltip">
+                                    Display Name
+                                    <button type="button" class="tooltip-icon" aria-label="Help for Display Name" aria-describedby="displayName-tooltip">?</button>
+                                    <span class="tooltip-content" id="displayName-tooltip" role="tooltip">The friendly name shown on the Windows login screen. Windows will create a managed local account (typically "kioskUser0") that auto-logs in. This display name is just for identification.</span>
+                                </label>
+                                <input type="text" id="displayName" placeholder="e.g., Kiosk User" data-change="updatePreview" aria-describedby="displayName-tooltip">
+                            </div>
+                        </div>
+
+                        <div id="existingAccountConfig" class="hidden" aria-hidden="true">
+                            <div class="form-group">
+                                <label for="accountName" class="with-tooltip">
+                                    Account Name
+                                    <button type="button" class="tooltip-icon" aria-label="Help for Account Name" aria-describedby="accountName-tooltip">?</button>
+                                    <span class="tooltip-content" id="accountName-tooltip" role="tooltip">The username of an existing account. Formats: Local: KioskUser, Domain: DOMAIN\KioskUser, Azure AD: AzureAD\user@domain.com. The account must exist before the kiosk config is applied.</span>
+                                </label>
+                                <input type="text" id="accountName" placeholder="e.g., DOMAIN\\KioskUser or KioskUser" data-change="updatePreview" aria-describedby="accountName-tooltip">
+                            </div>
+                        </div>
+
+                        <div id="groupAccountConfig" class="hidden" aria-hidden="true">
+                            <div class="form-group">
+                                <label for="groupType" class="with-tooltip">
+                                    Group Type
+                                    <button type="button" class="tooltip-icon" aria-label="Help for Group Type" aria-describedby="groupType-tooltip">?</button>
+                                    <span class="tooltip-content" id="groupType-tooltip" role="tooltip">Select the type of group to apply this profile to. All members of the group will get the restricted experience.</span>
+                                </label>
+                                <select id="groupType" data-change="updatePreview" aria-describedby="groupType-tooltip">
+                                    <option value="LocalGroup">Local Group</option>
+                                    <option value="ActiveDirectoryGroup">Active Directory Group</option>
+                                    <option value="AzureActiveDirectoryGroup">Azure AD Group</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="groupName" class="with-tooltip">
+                                    Group Name
+                                    <button type="button" class="tooltip-icon" aria-label="Help for Group Name" aria-describedby="groupName-tooltip">?</button>
+                                    <span class="tooltip-content" id="groupName-tooltip" role="tooltip">Local: GroupName. AD: DOMAIN\GroupName. Azure AD: Use the Group Object ID (GUID). The group must exist before the config is applied.</span>
+                                </label>
+                                <input type="text" id="groupName" placeholder="e.g., KioskUsers or DOMAIN\\KioskGroup" data-change="updatePreview" aria-describedby="groupName-tooltip">
+                            </div>
+                        </div>
+
+                        <div id="globalProfileConfig" class="hidden" aria-hidden="true">
+                            <p class="hint">
+                                <strong>Global Profile:</strong> This profile applies to ALL non-administrator users on the device. No specific account or group configuration needed.
+                            </p>
+                            <div class="form-group">
+                                <div class="checkbox-group">
+                                    <span class="toggle-switch">
+                                        <input type="checkbox" role="switch" id="excludeDeviceOwner" checked data-change="updatePreview" aria-describedby="excludeDeviceOwner-tooltip">
+                                        <span class="toggle-slider" aria-hidden="true"></span>
+                                    </span>
+                                    <label for="excludeDeviceOwner" class="with-tooltip">
+                                        Exclude Device Owner
+                                        <button type="button" class="tooltip-icon" aria-label="Help for Exclude Device Owner" aria-describedby="excludeDeviceOwner-tooltip">?</button>
+                                        <span class="tooltip-content" id="excludeDeviceOwner-tooltip" role="tooltip">When enabled, the device owner (the account that set up the device) is excluded from the Global Profile restrictions. This prevents the admin from being locked into kiosk mode.</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+
+                    </div>
+                    <!-- End Account & Identity Tab -->
+
+                    <!-- Device Settings Tab (Script-only settings) -->
+                    <div class="tab-content" role="tabpanel" id="tab-device" aria-labelledby="tab-btn-device">
+                <fieldset class="section">
+                    <legend class="section-header" data-section-key="deviceSettings"></legend>
+                    <div class="section-content">
+                        <p class="hint" style="margin-bottom: 16px;">
+                            These settings are applied by the <strong>On-Demand Kiosk Script</strong>, not the Assigned Access XML. For Intune/MDM deployments, configure these separately via Configuration Profiles or registry policies.
+                        </p>
+
+                        <div class="sub-panel">
+                            <div class="sub-panel-title">TOUCH INPUT</div>
+                            <div class="form-group">
+                                <div class="checkbox-group">
+                                    <span class="toggle-switch">
+                                        <input type="checkbox" role="switch" id="enableTouchKeyboard" data-change="updatePreview" aria-describedby="touchKeyboard-tooltip">
+                                        <span class="toggle-slider" aria-hidden="true"></span>
+                                    </span>
+                                    <label for="enableTouchKeyboard" class="with-tooltip">
+                                        Enable Touch Keyboard Auto-Invoke <span class="badge-script">Script Only</span>
+                                        <button type="button" class="tooltip-icon" aria-label="Help for Touch Keyboard" aria-describedby="touchKeyboard-tooltip">?</button>
+                                        <span class="tooltip-content" id="touchKeyboard-tooltip" role="tooltip">Forces the Windows touch keyboard to appear automatically when tapping text fields on desktop/laptop devices with touchscreen monitors. Sets registry keys for EnableDesktopModeAutoInvoke and TouchKeyboardTapInvoke. Only applies to the On-Demand Kiosk Script — for Intune/MDM deployments, create a separate Configuration Profile to manage these settings.</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+                    </div>
+                    <!-- End Device Settings Tab -->
+
+                    <!-- Summary Tab -->
+                    <div class="tab-content" role="tabpanel" id="tab-summary" aria-labelledby="tab-btn-summary">
+                        <div class="callout callout-compact hidden" data-callout-id="save-config-reminder" role="alert">
+                            <button type="button" class="callout-close" data-action="dismissCallout" aria-label="Dismiss">&times;</button>
+                            <div class="callout-title">Save your configuration</div>
+                            <div class="callout-body">Don't lose your work — click <strong>Save Config</strong> in the upper-right corner to download a reusable <code>.kioskoverseer.json</code> file before closing or refreshing the page.</div>
+                        </div>
+                        <div class="callout callout-compact" data-callout-id="star-github" role="complementary">
+                            <button type="button" class="callout-close" data-action="dismissCallout" aria-label="Dismiss">&times;</button>
+                            <div class="callout-title">Enjoying Kiosk Overseer?</div>
+                            <div class="callout-body">If this tool saved you time, consider giving it a <a href="https://github.com/8bits1beard-io/Kiosk-Overseer" target="_blank" rel="noopener noreferrer">star on GitHub</a> — it helps others discover the project!</div>
+                        </div>
+                        <fieldset class="section">
+                            <legend class="section-header" data-section-key="configSummary"></legend>
+                            <div class="section-content">
+                                <div class="summary-cards" role="group" aria-label="Configuration summary">
+                                    <div class="summary-card">
+                                        <div class="summary-card-title">Profile</div>
+                                        <div class="summary-card-body">
+                                            <div class="summary-row">
+                                                <span class="summary-label">Name</span>
+                                                <span class="summary-value" id="previewProfileName">—</span>
+                                            </div>
+                                            <div class="summary-row">
+                                                <span class="summary-label">Account</span>
+                                                <span class="summary-value" id="previewAutoLogon">—</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="summary-card">
+                                        <div class="summary-card-title">Application</div>
+                                        <div class="summary-card-body">
+                                            <div class="summary-row">
+                                                <span class="summary-label">Kiosk Mode</span>
+                                                <span class="summary-value" id="previewKioskMode">—</span>
+                                            </div>
+                                            <div class="summary-row">
+                                                <span class="summary-label">Allowed Apps</span>
+                                                <span class="summary-value" id="previewAllowedApps">—</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="summary-card">
+                                        <div class="summary-card-title">Layout</div>
+                                        <div class="summary-card-body">
+                                            <div class="summary-row">
+                                                <span class="summary-label">Start Pins</span>
+                                                <span class="summary-value" id="previewStartPins">—</span>
+                                            </div>
+                                            <div class="summary-row">
+                                                <span class="summary-label">Taskbar Pins</span>
+                                                <span class="summary-value" id="previewToolbarPins">—</span>
+                                            </div>
+                                            <div class="summary-row">
+                                                <span class="summary-label">Show Taskbar</span>
+                                                <span class="summary-value" id="previewShowTaskbar">—</span>
+                                            </div>
+                                            <div class="summary-row">
+                                                <span class="summary-label">File Explorer</span>
+                                                <span class="summary-value" id="previewFileExplorer">—</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="validationStatus" role="status" aria-live="polite" aria-atomic="true"></div>
+
+                                <div class="sub-panel export-panel">
+                                    <div class="sub-panel-title">EXPORT</div>
+                                    <div class="export-grid" role="group" aria-label="Export options">
+                                        <div class="export-item">
+                                            <span class="with-tooltip" style="display: inline-flex; align-items: center; gap: 4px;">
+                                                <button type="button" class="btn-primary export-btn-main" data-action="downloadXml" aria-describedby="downloadXml-tooltip">XML Configuration</button>
+                                                <button type="button" class="tooltip-icon" aria-label="Help for XML Configuration" aria-describedby="downloadXml-tooltip">?</button>
+                                                <span class="tooltip-content" id="downloadXml-tooltip" role="tooltip">
+                                                    <strong>AssignedAccess XML Configuration</strong><br><br>
+                                                    The core kiosk configuration file that defines allowed apps, pins, taskbar settings, and account restrictions.<br><br>
+                                                    <strong>What it does:</strong><br>
+                                                    • Defines the kiosk profile and restrictions<br>
+                                                    • Gets applied via MDM or PPKG to configure the device<br><br>
+                                                    <strong>Note:</strong> You may also need Shortcut Creator and/or Manifest Override deployed separately.
+                                                </span>
+                                            </span>
+                                            <span class="export-item-desc">Upload to Intune OMA-URI or Windows Configuration Designer</span>
+                                        </div>
+                                        <div class="export-item">
+                                            <span class="with-tooltip" style="display: inline-flex; align-items: center; gap: 4px;">
+                                                <button type="button" class="btn-primary export-btn-main" data-action="downloadPowerShell" aria-describedby="onDemandScript-tooltip">On-Demand Kiosk Script</button>
+                                                <button type="button" class="tooltip-icon" aria-label="Help for On-Demand Kiosk Script" aria-describedby="onDemandScript-tooltip">?</button>
+                                                <span class="tooltip-content" id="onDemandScript-tooltip" role="tooltip">
+                                                    <strong>On-Demand Kiosk Script</strong><br><br>
+                                                    Run directly on a device to immediately set up the kiosk. Does everything in one step.<br><br>
+                                                    <strong>What it does:</strong><br>
+                                                    • Creates Start menu and Taskbar shortcuts (.lnk files)<br>
+                                                    • Applies Edge Manifest Override if needed<br>
+                                                    • Applies AssignedAccess XML configuration<br>
+                                                    • Enables diagnostic event logs for troubleshooting<br>
+                                                    • Sets up KioskOverseer Sentry (if enabled)<br>
+                                                    • Generates detailed CMTrace-compatible log file<br><br>
+                                                    <strong>Note:</strong> Must be run as SYSTEM using psexec or similar tool.
+                                                </span>
+                                            </span>
+                                            <span class="export-item-desc">Run on a device to set up the kiosk immediately — does everything in one step</span>
+                                        </div>
+                                        <div class="export-item-separator"></div>
+                                        <div class="export-item">
+                                            <span class="with-tooltip" style="display: inline-flex; align-items: center; gap: 4px;">
+                                                <button type="button" class="btn-secondary" data-action="downloadShortcutsScript" aria-describedby="shortcutCreator-tooltip">Shortcut Creator</button>
+                                                <button type="button" class="tooltip-icon" aria-label="Help for Shortcut Creator" aria-describedby="shortcutCreator-tooltip">?</button>
+                                                <span class="tooltip-content" id="shortcutCreator-tooltip" role="tooltip">
+                                                    <strong>Shortcut Creator Script</strong><br><br>
+                                                    Creates Start menu and Taskbar .lnk shortcut files.<br><br>
+                                                    <strong>Why needed:</strong><br>
+                                                    • StartPins with <code>desktopAppLink</code> require actual .lnk files to exist on the device<br>
+                                                    • Intune OMA-URI can only apply XML, not create files<br><br>
+                                                    <strong>What it does:</strong><br>
+                                                    • Creates .lnk files in Start Menu Programs folder<br>
+                                                    • Sets custom names, icons, and arguments<br>
+                                                    • Creates detection sentinel file for Win32 App tracking<br>
+                                                    • Generates CMTrace-compatible log file
+                                                </span>
+                                            </span>
+                                            <span class="export-item-desc">Creates .lnk shortcut files — deploy as a separate Intune app alongside the XML</span>
+                                        </div>
+                                        <div class="export-item">
+                                            <span class="with-tooltip" style="display: inline-flex; align-items: center; gap: 4px;">
+                                                <button type="button" class="btn-secondary" data-action="downloadEdgeManifestWorkaround" aria-describedby="manifestOverride-tooltip">Manifest Override</button>
+                                                <button type="button" class="tooltip-icon" aria-label="Help for Manifest Override" aria-describedby="manifestOverride-tooltip">?</button>
+                                                <span class="tooltip-content" id="manifestOverride-tooltip" role="tooltip">
+                                                    <strong>Edge Manifest Override (Advanced/Unsupported)</strong><br><br>
+                                                    Forces Windows to use your custom shortcut names and icons for Edge pins instead of defaulting to "Microsoft Edge" branding.<br><br>
+                                                    <strong>Important:</strong><br>
+                                                    • NOT supported by Microsoft<br>
+                                                    • Edge updates may break this workaround<br>
+                                                    • Creates a scheduled task that runs at startup<br>
+                                                    • Includes install and remove scripts<br><br>
+                                                    Downloads two PowerShell scripts to apply/remove the workaround.
+                                                </span>
+                                            </span>
+                                            <span class="export-item-desc">Custom Edge shortcut branding — deploy as a separate Intune app (optional)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <fieldset class="section">
+                            <legend class="section-header collapsible-header" data-section-key="deployGuide" aria-expanded="true"></legend>
+                            <div class="section-content collapsible-content">
+                                <nav class="deploy-tabs" role="tablist" aria-label="Deployment methods">
+                                    <button type="button" class="deploy-tab active" role="tab" aria-selected="true" aria-controls="deploy-intune" id="deploy-tab-intune" data-action="switchDeployTab" data-arg="intune">Intune</button>
+                                    <button type="button" class="deploy-tab" role="tab" aria-selected="false" aria-controls="deploy-powershell" id="deploy-tab-powershell" data-action="switchDeployTab" data-arg="powershell">PowerShell</button>
+                                    <button type="button" class="deploy-tab" role="tab" aria-selected="false" aria-controls="deploy-ppkg" id="deploy-tab-ppkg" data-action="switchDeployTab" data-arg="ppkg">Provisioning Package</button>
+                                    <button type="button" class="deploy-tab" role="tab" aria-selected="false" aria-controls="deploy-flow" id="deploy-tab-flow" data-action="switchDeployTab" data-arg="flow">Deployment Flow</button>
+                                </nav>
+
+                                <!-- Intune Tab -->
+                                <div class="deploy-content active" role="tabpanel" id="deploy-intune" aria-labelledby="deploy-tab-intune">
+                                    <p class="deploy-description">Recommended for enterprise. Deploy via Microsoft Intune using a custom OMA-URI policy.</p>
+
+                                    <div class="deploy-steps">
+                                        <div class="deploy-step">
+                                            <div class="deploy-step-header">
+                                                <span class="deploy-step-badge">1</span>
+                                                <h4>Navigate to Intune</h4>
+                                            </div>
+                                            <ul>
+                                                <li>Go to <a href="https://intune.microsoft.com" target="_blank" rel="noopener noreferrer">Microsoft Intune admin center</a></li>
+                                                <li>Select <strong>Devices</strong> → <strong>Configuration profiles</strong></li>
+                                            </ul>
+                                        </div>
+
+                                        <div class="deploy-step">
+                                            <div class="deploy-step-header">
+                                                <span class="deploy-step-badge">2</span>
+                                                <h4>Create Profile</h4>
+                                            </div>
+                                            <ul>
+                                                <li>Click <strong>+ Create profile</strong></li>
+                                                <li>Platform: <strong>Windows 11</strong></li>
+                                                <li>Profile type: <strong>Templates</strong> → <strong>Custom</strong></li>
+                                            </ul>
+                                        </div>
+
+                                        <div class="deploy-step">
+                                            <div class="deploy-step-header">
+                                                <span class="deploy-step-badge">3</span>
+                                                <h4>Configure OMA-URI</h4>
+                                            </div>
+                                            <table class="oma-uri-table">
+                                                <tr><th>Field</th><th>Value</th></tr>
+                                                <tr><td>Name</td><td>AssignedAccess Configuration</td></tr>
+                                                <tr><td>OMA-URI</td><td><code>./Vendor/MSFT/AssignedAccess/Configuration</code></td></tr>
+                                                <tr><td>Data type</td><td>String</td></tr>
+                                                <tr><td>Value</td><td><em>(Open downloaded XML file and copy entire contents)</em></td></tr>
+                                            </table>
+                                        </div>
+
+                                        <div class="deploy-step">
+                                            <div class="deploy-step-header">
+                                                <span class="deploy-step-badge">4</span>
+                                                <h4>Assign &amp; Deploy</h4>
+                                            </div>
+                                            <ul>
+                                                <li>Assign to a device group</li>
+                                                <li>Device will sync and apply configuration</li>
+                                            </ul>
+                                        </div>
+
+                                        <div class="deploy-step">
+                                            <div class="deploy-step-header">
+                                                <span class="deploy-step-badge">5</span>
+                                                <h4>Deploy Shortcut Creator (If Needed)</h4>
+                                            </div>
+                                            <p><strong>Required if:</strong> Your Start or Taskbar pins use <code>desktopAppLink</code> (reference .lnk file paths)</p>
+                                            <p><strong>Deployment options:</strong></p>
+                                            <ul>
+                                                <li><strong>Option A (Simpler):</strong> Deploy as <strong>Intune Script</strong> (Devices → Scripts → Add PowerShell script)</li>
+                                                <li><strong>Option B (More Control):</strong> Package as <strong>Win32 App</strong> with detection rules and dependencies (see Step 7 below)</li>
+                                            </ul>
+                                            <p>Click <strong>Shortcut Creator</strong> in the Export section above to download the script</p>
+                                        </div>
+
+                                        <div class="deploy-step">
+                                            <div class="deploy-step-header">
+                                                <span class="deploy-step-badge">6</span>
+                                                <h4>Deploy Manifest Override (Optional)</h4>
+                                            </div>
+                                            <p><strong>Only needed if:</strong> You want custom names/icons for Edge shortcuts instead of "Microsoft Edge" branding</p>
+                                            <p><strong>Deployment:</strong> Same as above - deploy as Intune Script or Win32 App (see Step 7 below)</p>
+                                            <p>Click <strong>Manifest Override</strong> in the Export section above to download both install and remove scripts</p>
+                                        </div>
+
+                                        <div class="deploy-step">
+                                            <div class="deploy-step-header">
+                                                <span class="deploy-step-badge">7</span>
+                                                <h4>Win32 App Creation Guide (Shortcut Creator & Manifest Override)</h4>
+                                            </div>
+                                            <p><strong>For Option B above:</strong> Follow these steps to package both scripts as Win32 apps</p>
+
+                                            <h5 style="margin-top: 16px; margin-bottom: 8px; font-size: 0.9rem;">7a. Get IntuneWinAppUtil Tool</h5>
+                                            <ol style="margin-left: 20px; font-size: 0.85rem;">
+                                                <li>Download from <a href="https://github.com/microsoft/Microsoft-Win32-Content-Prep-Tool" target="_blank" rel="noopener noreferrer">Microsoft GitHub</a></li>
+                                                <li>Extract <code>IntuneWinAppUtil.exe</code> to a folder (e.g., <code>C:\IntuneTools\</code>)</li>
+                                            </ol>
+
+                                            <h5 style="margin-top: 16px; margin-bottom: 8px; font-size: 0.9rem;">7b. Package Shortcut Creator</h5>
+                                            <ol style="margin-left: 20px; font-size: 0.85rem;">
+                                                <li>Create source folder: <code>C:\IntunePackaging\ShortcutCreator\</code></li>
+                                                <li>Place downloaded Shortcut Creator script in folder (e.g., <code>CreateShortcuts_Lobby-Kiosk.ps1</code>)</li>
+                                                <li>Run IntuneWinAppUtil (replace filename with your actual script name):
+                                                    <div class="deploy-code-wrapper" style="margin-top: 8px;">
+                                                        <pre class="deploy-code crt-pane" style="font-size: 0.75rem;">IntuneWinAppUtil.exe -c "C:\IntunePackaging\ShortcutCreator" -s "CreateShortcuts_YourConfigName.ps1" -o "C:\IntunePackaging\Output"</pre>
+                                                    </div>
+                                                </li>
+                                                <li>Upload the generated <code>.intunewin</code> file to Intune</li>
+                                            </ol>
+
+                                            <p style="margin-top: 12px; font-size: 0.85rem;"><strong>Install command (replace filename with your actual script name):</strong></p>
+                                            <div class="deploy-code-wrapper">
+                                                <pre class="deploy-code crt-pane" style="font-size: 0.75rem;">powershell.exe -ExecutionPolicy Bypass -File "CreateShortcuts_YourConfigName.ps1"</pre>
+                                            </div>
+
+                                            <p style="margin-top: 12px; font-size: 0.85rem;"><strong>Uninstall command:</strong></p>
+                                            <div class="deploy-code-wrapper">
+                                                <pre class="deploy-code crt-pane" style="font-size: 0.75rem;">powershell.exe -Command "Write-Host 'Shortcuts remain in place'"</pre>
+                                            </div>
+
+                                            <p style="margin-top: 12px; font-size: 0.85rem;"><strong>Detection script (PowerShell):</strong></p>
+                                            <div class="deploy-code-wrapper">
+                                                <pre class="deploy-code crt-pane" style="font-size: 0.75rem;"># Detect Shortcut Creator - checks for sentinel file
+$sentinelPath = "$env:ProgramData\KioskOverseer\ShortcutCreator.installed"
+if (Test-Path $sentinelPath) {
+    Write-Host "Shortcut Creator installed"
+    exit 0
+} else {
+    exit 1
+}</pre>
+                                            </div>
+                                            <p style="margin-top: 8px; font-size: 0.8rem;"><em>Note: The Shortcut Creator script automatically creates this sentinel file - no manual modification needed.</em></p>
+
+                                            <h5 style="margin-top: 16px; margin-bottom: 8px; font-size: 0.9rem;">7c. Package Manifest Override</h5>
+                                            <ol style="margin-left: 20px; font-size: 0.85rem;">
+                                                <li>Create source folder: <code>C:\IntunePackaging\ManifestOverride\</code></li>
+                                                <li>Place both install and remove scripts in folder</li>
+                                                <li>Run IntuneWinAppUtil:
+                                                    <div class="deploy-code-wrapper" style="margin-top: 8px;">
+                                                        <pre class="deploy-code crt-pane" style="font-size: 0.75rem;">IntuneWinAppUtil.exe -c "C:\IntunePackaging\ManifestOverride" -s "KioskOverseer-EdgeVisualElements-Install.ps1" -o "C:\IntunePackaging\Output"</pre>
+                                                    </div>
+                                                </li>
+                                                <li>Upload the generated <code>.intunewin</code> file to Intune</li>
+                                            </ol>
+
+                                            <p style="margin-top: 12px; font-size: 0.85rem;"><strong>Install command:</strong></p>
+                                            <div class="deploy-code-wrapper">
+                                                <pre class="deploy-code crt-pane" style="font-size: 0.75rem;">powershell.exe -ExecutionPolicy Bypass -File "KioskOverseer-EdgeVisualElements-Install.ps1"</pre>
+                                            </div>
+
+                                            <p style="margin-top: 12px; font-size: 0.85rem;"><strong>Uninstall command:</strong></p>
+                                            <div class="deploy-code-wrapper">
+                                                <pre class="deploy-code crt-pane" style="font-size: 0.75rem;">powershell.exe -ExecutionPolicy Bypass -File "KioskOverseer-EdgeVisualElements-Remove.ps1"</pre>
+                                            </div>
+
+                                            <p style="margin-top: 12px; font-size: 0.85rem;"><strong>Detection script (PowerShell):</strong></p>
+                                            <div class="deploy-code-wrapper">
+                                                <pre class="deploy-code crt-pane" style="font-size: 0.75rem;"># Detect Manifest Override - checks for backup file and scheduled task
+$taskExists = Get-ScheduledTask -TaskName "KioskOverseer-EdgeVisualElements" -ErrorAction SilentlyContinue
+$backupExists = Test-Path "$env:ProgramFiles\Microsoft\Edge\Application\msedge.VisualElementsManifest.xml.kioskoverseer.bak"
+
+if ($taskExists -and $backupExists) {
+    Write-Host "Manifest Override installed"
+    exit 0
+} else {
+    exit 1
+}</pre>
+                                            </div>
+                                        </div>
+
+                                        <div class="deploy-step">
+                                            <div class="deploy-step-header">
+                                                <span class="deploy-step-badge">8</span>
+                                                <h4>Reboot &amp; Validate</h4>
+                                            </div>
+                                            <ul>
+                                                <li>Device reboots to apply kiosk configuration</li>
+                                                <li>Sign in with kiosk account to test</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <div class="deploy-note deploy-note--warning">
+                                        <strong>Requirements:</strong> Device must be Azure AD joined or Hybrid Azure AD joined.
+                                    </div>
+
+                                    <div class="deploy-note deploy-note--info">
+                                        <strong>Deployment Summary:</strong> The OMA-URI policy applies the kiosk XML configuration. Shortcut Creator and Manifest Override must be deployed separately as scripts or Win32 apps because OMA-URI policies cannot create files or run commands on the device.
+                                    </div>
+                                </div>
+
+                                <!-- PowerShell Tab -->
+                                <div class="deploy-content" role="tabpanel" id="deploy-powershell" aria-labelledby="deploy-tab-powershell">
+                                    <p class="deploy-description">For standalone devices or testing. Simple two-step process: download the On-Demand Kiosk Script and run it as SYSTEM.</p>
+
+                                    <div class="deploy-steps">
+                                        <div class="deploy-step">
+                                            <div class="deploy-step-header">
+                                                <span class="deploy-step-badge">1</span>
+                                                <h4>Download On-Demand Kiosk Script</h4>
+                                            </div>
+                                            <p>Click <strong>On-Demand Kiosk Script</strong> in the Export section above to download. This script handles everything: applies XML, creates shortcuts, and configures the kiosk.</p>
+                                        </div>
+
+                                        <div class="deploy-step">
+                                            <div class="deploy-step-header">
+                                                <span class="deploy-step-badge">2</span>
+                                                <h4>Run as SYSTEM</h4>
+                                            </div>
+                                            <p>Execute the script using PsExec to run as SYSTEM:</p>
+                                            <div class="deploy-code-wrapper">
+                                                <pre class="deploy-code crt-pane">psexec -i -s powershell.exe -ExecutionPolicy Bypass -File "C:\path\to\Apply-AssignedAccess.ps1"</pre>
+                                                <button type="button" class="deploy-code-copy btn-secondary btn-small" data-action="copyDeployCode">Copy</button>
+                                            </div>
+                                            <p style="margin-top: 8px;">The device will reboot to apply the kiosk configuration.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="deploy-note deploy-note--warning">
+                                        <strong>Why SYSTEM context?</strong> The MDM WMI Bridge requires SYSTEM (LocalSystem account, SID S-1-5-18) privileges to apply AssignedAccess configurations. Running as Administrator is not sufficient - you must use the SYSTEM account. PsExec (<code>-s</code> flag) provides an easy way to run PowerShell as SYSTEM.
+                                    </div>
+
+                                    <div class="deploy-note deploy-note--info">
+                                        <strong>Download PsExec:</strong> <a href="https://docs.microsoft.com/en-us/sysinternals/downloads/psexec" target="_blank" rel="noopener noreferrer">Microsoft Sysinternals PsExec</a> (free tool from Microsoft)
+                                    </div>
+                                </div>
+
+                                <!-- Provisioning Package Tab -->
+                                <div class="deploy-content" role="tabpanel" id="deploy-ppkg" aria-labelledby="deploy-tab-ppkg">
+                                    <p class="deploy-description">For bulk deployment during OOBE or to existing devices.</p>
+
+                                    <div class="deploy-steps">
+                                        <div class="deploy-step">
+                                            <div class="deploy-step-header">
+                                                <span class="deploy-step-badge">1</span>
+                                                <h4>Install Windows Configuration Designer</h4>
+                                            </div>
+                                            <ul>
+                                                <li>Download from <a href="https://apps.microsoft.com/detail/9nblggh4tx22" target="_blank" rel="noopener noreferrer">Microsoft Store</a> or Windows ADK</li>
+                                            </ul>
+                                        </div>
+
+                                        <div class="deploy-step">
+                                            <div class="deploy-step-header">
+                                                <span class="deploy-step-badge">2</span>
+                                                <h4>Create Provisioning Package</h4>
+                                            </div>
+                                            <ul>
+                                                <li>Open Windows Configuration Designer</li>
+                                                <li>Select <strong>Advanced provisioning</strong></li>
+                                                <li>Navigate to: <strong>Runtime settings</strong> → <strong>AssignedAccess</strong> → <strong>AssignedAccessSettings</strong></li>
+                                                <li>Paste your XML configuration</li>
+                                            </ul>
+                                        </div>
+
+                                        <div class="deploy-step">
+                                            <div class="deploy-step-header">
+                                                <span class="deploy-step-badge">3</span>
+                                                <h4>Export &amp; Apply</h4>
+                                            </div>
+                                            <ul>
+                                                <li>Export → Provisioning package → Create</li>
+                                                <li>Apply by double-clicking the .ppkg file or during Windows setup</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <div class="deploy-note deploy-note--tip">
+                                        <strong>TIP:</strong> Provisioning packages can be applied during OOBE by placing them on a USB drive.
+                                    </div>
+                                </div>
+
+                                <!-- Deployment Flow Tab -->
+                                <div class="deploy-content" role="tabpanel" id="deploy-flow" aria-labelledby="deploy-tab-flow">
+                                    <div class="flow-layout">
+                                        <div class="flow-section">
+                                            <h4 class="flow-section-title">Intune OMA-URI Deployment</h4>
+                                            <div class="flow-row">
+                                                <div class="flow-node">Create OMA-URI Profile</div>
+                                                <div class="flow-arrow">→</div>
+                                                <div class="flow-node">Deploy XML via OMA-URI</div>
+                                                <div class="flow-arrow">→</div>
+                                                <div class="flow-node">Deploy Shortcut Creator (Win32/Script)*</div>
+                                                <div class="flow-arrow">→</div>
+                                                <div class="flow-node">Deploy Manifest Override (Win32/Script)**</div>
+                                                <div class="flow-arrow">→</div>
+                                                <div class="flow-node">Device reboots and applies kiosk</div>
+                                            </div>
+                                        </div>
+                                        <div class="flow-section">
+                                            <h4 class="flow-section-title">Local/PowerShell Deployment</h4>
+                                            <div class="flow-row">
+                                                <div class="flow-node">Download On-Demand Kiosk Script</div>
+                                                <div class="flow-arrow">→</div>
+                                                <div class="flow-node">Run as SYSTEM (psexec -i -s)</div>
+                                                <div class="flow-arrow">→</div>
+                                                <div class="flow-node">Script creates shortcuts + applies XML</div>
+                                                <div class="flow-arrow">→</div>
+                                                <div class="flow-node">Reboot and validate</div>
+                                            </div>
+                                        </div>
+                                        <div class="flow-footnote">
+                                            <strong>*</strong> Shortcut Creator is <strong>required</strong> if your pins use <code>desktopAppLink</code> (.lnk file paths).<br>
+                                            <strong>**</strong> Manifest Override is <strong>optional</strong> - only needed if you want custom Edge shortcut names/icons instead of "Microsoft Edge" branding.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Common Notes -->
+                                <div class="deploy-footer">
+                                    <strong>All methods require:</strong> Windows 11 Pro, Enterprise, or Education. User/group accounts must exist before configuration is applied.
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                    <!-- End Summary Tab -->
+
+                </div>
+                <!-- End tab-panels -->
+            </div>
+        </section>
+
+        <!-- Preview Panel -->
+        <section class="panel" aria-labelledby="preview-heading">
+            <h2 id="preview-heading" class="panel-header">
+                <span data-section-key="xmlPreview"></span>
+            </h2>
+            <div class="panel-content preview-content">
+                <pre class="xml-preview crt-terminal crt-pane" id="xmlPreview" aria-label="Generated XML configuration (read-only)" aria-readonly="true" tabindex="0">
+                    <!-- XML will be rendered here -->
+                </pre>
+            </div>
+        </section>
+    </main>
+
+    <label for="configImportInput" class="sr-only">Import Kiosk Overseer configuration file</label>
+    <input type="file" id="configImportInput" accept=".kioskoverseer.json,.json" style="display:none" data-change="handleConfigImport">
+
+    <footer class="site-footer" role="contentinfo">
+        <a href="https://github.com/8bits1beard-io/Kiosk-Overseer/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">GPL v3.0</a>
+        <span>•</span>
+        <button type="button" class="btn-secondary btn-small" id="themeToggle" data-action="toggleTheme">Theme: Fallout</button>
+    </footer>
+
+    <!-- Welcome Modal -->
+    <div id="welcomeModal" class="modal hidden" role="dialog" aria-labelledby="welcomeModalTitle" aria-modal="true">
+        <div class="modal-backdrop" data-action="dismissWelcome"></div>
+        <div class="modal-content welcome-modal-content">
+            <div class="modal-header">
+                <h2 id="welcomeModalTitle">Welcome to Kiosk Overseer</h2>
+                <button type="button" class="modal-close" data-action="dismissWelcome" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body welcome-body">
+                <div class="welcome-logo-row">
+                    <img src="assets/Fallout_MKSA.png" alt="Make Kiosks Simple Again" class="welcome-logo">
+                </div>
+                <p class="welcome-tagline">Make Kiosks Simple Again!</p>
+                <p>Thanks for checking out Kiosk Overseer. This tool was born from a simple frustration: configuring Windows kiosk mode shouldn't require hand-editing XML or wrestling with cryptic namespaces.</p>
+                <p>Intune's Settings Catalog only scratches the surface of what Assigned Access can do. Kiosk Overseer puts <strong>every control</strong> at your fingertips — Start menu pins, taskbar layout, Edge kiosk arguments, Win32 app paths, breakout sequences, and more — all without writing a single line of XML.</p>
+                <p class="welcome-cta">Select a kiosk mode to get started, or load a preset to explore.</p>
+                <div class="welcome-footer">
+                    <button type="button" class="btn-primary" data-action="dismissWelcome">Get Started</button>
+                    <a href="https://github.com/8bits1beard-io/Kiosk-Overseer" target="_blank" rel="noopener noreferrer" class="btn-secondary btn-star">Star on GitHub</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edge Kiosk Args Modal -->
+    <div id="edgeArgsModal" class="modal hidden" role="dialog" aria-labelledby="edgeArgsModalTitle" aria-modal="true">
+        <div class="modal-backdrop" data-action="hideEdgeArgsModal"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="edgeArgsModalTitle">Configure Kiosk Mode</h2>
+                <button type="button" class="modal-close" data-action="hideEdgeArgsModal" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body" style="display: flex; flex-direction: column; gap: 12px;">
+                <div class="form-group">
+                    <label for="modalEdgeArgsMode" style="font-size: 0.75rem; color: var(--text-secondary);">Kiosk Mode</label>
+                    <select id="modalEdgeArgsMode" data-change="updateModalEdgeArgsModeUI" style="width: 100%;">
+                        <option value="standard">Standard (no kiosk args)</option>
+                        <option value="kioskFullscreen">Kiosk Fullscreen</option>
+                        <option value="kioskPublic">Kiosk Public Browsing</option>
+                    </select>
+                </div>
+                <div id="modalEdgeArgsSourceConfig" class="hidden" aria-hidden="true">
+                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                        <div>
+                            <label for="modalEdgeArgsSourceType" style="font-size: 0.75rem; color: var(--text-secondary);">Source</label>
+                            <select id="modalEdgeArgsSourceType" data-change="updateModalEdgeArgsSourceUI" style="width: 140px;">
+                                <option value="url">Web URL</option>
+                                <option value="file">Local File</option>
+                            </select>
+                        </div>
+                        <div id="modalEdgeArgsUrlConfig" style="flex: 1; min-width: 200px;">
+                            <label for="modalEdgeArgsUrl" style="font-size: 0.75rem; color: var(--text-secondary);">URL</label>
+                            <input type="text" id="modalEdgeArgsUrl" placeholder="https://example.com" style="width: 100%;">
+                        </div>
+                        <div id="modalEdgeArgsFileConfig" class="hidden" aria-hidden="true" style="flex: 1; min-width: 200px;">
+                            <label for="modalEdgeArgsFilePath" style="font-size: 0.75rem; color: var(--text-secondary);">File Path</label>
+                            <input type="text" id="modalEdgeArgsFilePath" placeholder="C:\\Kiosk\\index.html" style="width: 100%;">
+                        </div>
+                    </div>
+                </div>
+                <div id="modalEdgeArgsIdleConfig" class="hidden" aria-hidden="true">
+                    <label for="modalEdgeArgsIdle" style="font-size: 0.75rem; color: var(--text-secondary);">Idle Timeout (minutes)</label>
+                    <input type="number" id="modalEdgeArgsIdle" min="0" placeholder="0" style="width: 120px;">
+                </div>
+                <div style="display: flex; gap: 8px; margin-top: 8px;">
+                    <button type="button" class="btn-primary btn-small" data-action="applyEdgeArgsModal">Apply</button>
+                    <button type="button" class="btn-secondary btn-small" data-action="hideEdgeArgsModal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="dom.js?v=1.8.3"></script>
+    <script src="state.js?v=1.8.3"></script>
+    <script src="helpers.js?v=1.8.3"></script>
+    <script src="xml.js?v=1.8.3"></script>
+    <script src="validation.js?v=1.8.3"></script>
+    <script src="app.js?v=1.8.3"></script>
+    <script src="apps.js?v=1.8.3"></script>
+    <script src="pins.js?v=1.8.3"></script>
+    <script src="config.js?v=1.8.3"></script>
+</body>
+</html>

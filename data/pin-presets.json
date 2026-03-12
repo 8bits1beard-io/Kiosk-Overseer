@@ -1,0 +1,221 @@
+{
+    "pins": {
+        "edge": {
+            "name": "Microsoft Edge",
+            "pinType": "desktopAppLink",
+            "target": "%ProgramFiles(x86)%\\Microsoft\\Edge\\Application\\msedge.exe",
+            "args": "",
+            "workingDir": "",
+            "iconPath": "",
+            "systemShortcut": "%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Microsoft Edge.lnk"
+        },
+        "chrome": {
+            "name": "Google Chrome",
+            "pinType": "desktopAppLink",
+            "target": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+            "args": "",
+            "workingDir": "",
+            "iconPath": ""
+        },
+        "firefox": {
+            "name": "Mozilla Firefox",
+            "pinType": "desktopAppLink",
+            "target": "C:\\Program Files\\Mozilla Firefox\\firefox.exe",
+            "args": "",
+            "workingDir": "",
+            "iconPath": ""
+        },
+        "calculator": {
+            "name": "Calculator",
+            "pinType": "packagedAppId",
+            "packagedAppId": "Microsoft.WindowsCalculator_8wekyb3d8bbwe!App"
+        },
+        "photos": {
+            "name": "Photos",
+            "pinType": "packagedAppId",
+            "packagedAppId": "Microsoft.Windows.Photos_8wekyb3d8bbwe!App"
+        },
+        "settings": {
+            "name": "Settings",
+            "pinType": "packagedAppId",
+            "packagedAppId": "windows.immersivecontrolpanel_cw5n1h2txyewy!microsoft.windows.immersivecontrolpanel"
+        },
+        "osk": {
+            "name": "On-Screen Keyboard",
+            "pinType": "desktopAppLink",
+            "target": "C:\\Windows\\System32\\osk.exe",
+            "args": "",
+            "workingDir": "",
+            "iconPath": ""
+        },
+        "touchKeyboard": {
+            "name": "Touch Keyboard",
+            "pinType": "desktopAppLink",
+            "target": "C:\\Program Files\\Common Files\\microsoft shared\\ink\\TabTip.exe",
+            "args": "",
+            "workingDir": "",
+            "iconPath": ""
+        },
+        "controlPanel": {
+            "name": "Control Panel",
+            "pinType": "desktopAppLink",
+            "target": "C:\\Windows\\System32\\control.exe",
+            "args": "",
+            "workingDir": "",
+            "iconPath": ""
+        },
+        "fileExplorer": {
+            "name": "File Explorer",
+            "pinType": "desktopAppLink",
+            "target": "C:\\Windows\\explorer.exe",
+            "args": "",
+            "workingDir": "",
+            "iconPath": "",
+            "systemShortcut": "%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\File Explorer.lnk"
+        },
+        "printers": {
+            "name": "Printers",
+            "pinType": "desktopAppLink",
+            "target": "C:\\Windows\\System32\\control.exe",
+            "args": "printers",
+            "workingDir": "",
+            "iconPath": ""
+        },
+        "printSpooler": {
+            "name": "Print Queue",
+            "pinType": "desktopAppLink",
+            "target": "C:\\Windows\\explorer.exe",
+            "args": "shell:PrintersFolder",
+            "workingDir": "",
+            "iconPath": ""
+        },
+        "soundSettings": {
+            "name": "Sound Settings",
+            "pinType": "desktopAppLink",
+            "target": "C:\\Windows\\System32\\sndvol.exe",
+            "args": "",
+            "workingDir": "",
+            "iconPath": ""
+        },
+        "volume": {
+            "name": "Volume Control",
+            "pinType": "desktopAppLink",
+            "target": "C:\\Windows\\System32\\sndvol.exe",
+            "args": "",
+            "workingDir": "",
+            "iconPath": ""
+        },
+        "cmd": {
+            "name": "Command Prompt",
+            "pinType": "desktopAppLink",
+            "target": "C:\\Windows\\System32\\cmd.exe",
+            "args": "",
+            "workingDir": "",
+            "iconPath": ""
+        },
+        "powershell": {
+            "name": "Windows PowerShell",
+            "pinType": "desktopAppLink",
+            "target": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "args": "",
+            "workingDir": "",
+            "iconPath": ""
+        },
+        "powershell7": {
+            "name": "PowerShell 7",
+            "pinType": "desktopAppLink",
+            "target": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+            "args": "",
+            "workingDir": "",
+            "iconPath": ""
+        },
+        "notepad": {
+            "name": "Notepad",
+            "pinType": "desktopAppLink",
+            "target": "C:\\Windows\\System32\\notepad.exe",
+            "args": "",
+            "workingDir": "",
+            "iconPath": ""
+        },
+        "word": {
+            "name": "Microsoft Word",
+            "pinType": "desktopAppLink",
+            "target": "C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE",
+            "args": "",
+            "workingDir": "",
+            "iconPath": ""
+        },
+        "excel": {
+            "name": "Microsoft Excel",
+            "pinType": "desktopAppLink",
+            "target": "C:\\Program Files\\Microsoft Office\\root\\Office16\\EXCEL.EXE",
+            "args": "",
+            "workingDir": "",
+            "iconPath": ""
+        },
+        "powerpoint": {
+            "name": "Microsoft PowerPoint",
+            "pinType": "desktopAppLink",
+            "target": "C:\\Program Files\\Microsoft Office\\root\\Office16\\POWERPNT.EXE",
+            "args": "",
+            "workingDir": "",
+            "iconPath": ""
+        },
+        "outlook": {
+            "name": "Microsoft Outlook",
+            "pinType": "desktopAppLink",
+            "target": "C:\\Program Files\\Microsoft Office\\root\\Office16\\OUTLOOK.EXE",
+            "args": "",
+            "workingDir": "",
+            "iconPath": ""
+        },
+        "onenote": {
+            "name": "OneNote",
+            "pinType": "packagedAppId",
+            "packagedAppId": "Microsoft.Office.OneNote_8wekyb3d8bbwe!microsoft.onenoteim"
+        },
+        "terminal": {
+            "name": "Windows Terminal",
+            "pinType": "packagedAppId",
+            "packagedAppId": "Microsoft.WindowsTerminal_8wekyb3d8bbwe!App"
+        },
+        "paint": {
+            "name": "Paint",
+            "pinType": "packagedAppId",
+            "packagedAppId": "Microsoft.Paint_8wekyb3d8bbwe!App"
+        },
+        "snipSketch": {
+            "name": "Snipping Tool",
+            "pinType": "packagedAppId",
+            "packagedAppId": "Microsoft.ScreenSketch_8wekyb3d8bbwe!App"
+        },
+        "stickyNotes": {
+            "name": "Sticky Notes",
+            "pinType": "packagedAppId",
+            "packagedAppId": "Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe!App"
+        },
+        "camera": {
+            "name": "Camera",
+            "pinType": "packagedAppId",
+            "packagedAppId": "Microsoft.WindowsCamera_8wekyb3d8bbwe!App"
+        },
+        "movies": {
+            "name": "Movies & TV",
+            "pinType": "packagedAppId",
+            "packagedAppId": "Microsoft.ZuneVideo_8wekyb3d8bbwe!Microsoft.ZuneVideo"
+        },
+        "teams": {
+            "name": "Teams",
+            "pinType": "packagedAppId",
+            "packagedAppId": "MSTeams_8wekyb3d8bbwe!MSTeams"
+        },
+        "zoom": {
+            "name": "Zoom",
+            "pinType": "desktopAppLink",
+            "target": "C:\\Program Files\\Zoom\\bin\\Zoom.exe",
+            "args": "",
+            "workingDir": "",
+            "iconPath": ""
+        }
+    }
+}

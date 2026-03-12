@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "name": "Lobby-Edge",
+  "savedAt": "2024-10-04T14:32:00.000Z",
+  "payload": {
+    "state": {
+      "mode": "single",
+      "accountType": "auto",
+      "allowedApps": [],
+      "startPins": [],
+      "taskbarPins": [],
+      "autoLaunchApp": null
+    },
+    "formValues": {
+      "configName": "Lobby-Edge",
+      "profileId": "{A1B2C3D4-1111-2222-3333-444455556666}",
+      "displayName": "Lobby Kiosk",
+      "appType": "edge",
+      "edgeSourceType": "url",
+      "edgeUrl": "https://www.microsoft.com",
+      "edgeFilePath": "",
+      "edgeKioskType": "fullscreen",
+      "edgeIdleTimeout": "0",
+      "uwpAumid": "",
+      "win32Path": "",
+      "win32Args": "",
+      "multiEdgeSourceType": "url",
+      "multiEdgeUrl": "",
+      "multiEdgeFilePath": "",
+      "multiEdgeKioskType": "fullscreen",
+      "win32AutoLaunchArgs": "",
+      "showTaskbar": true,
+      "fileExplorerAccess": "none",
+      "groupType": "LocalGroup",
+      "groupName": "",
+      "accountName": ""
+    }
+  }
+}

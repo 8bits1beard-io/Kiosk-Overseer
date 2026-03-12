@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "name": "Reception-Kiosk",
+  "savedAt": "2024-10-04T14:32:00.000Z",
+  "payload": {
+    "state": {
+      "mode": "multi",
+      "accountType": "auto",
+      "allowedApps": [
+        {
+          "type": "path",
+          "value": "%ProgramFiles(x86)%\\Microsoft\\Edge\\Application\\msedge.exe"
+        },
+        {
+          "type": "aumid",
+          "value": "Microsoft.WindowsCalculator_8wekyb3d8bbwe!App"
+        }
+      ],
+      "startPins": [
+        {
+          "name": "Microsoft Edge",
+          "pinType": "desktopAppLink",
+          "target": "%ProgramFiles(x86)%\\Microsoft\\Edge\\Application\\msedge.exe",
+          "args": "",
+          "workingDir": "",
+          "iconPath": ""
+        },
+        {
+          "name": "Calculator",
+          "pinType": "packagedAppId",
+          "packagedAppId": "Microsoft.WindowsCalculator_8wekyb3d8bbwe!App"
+        }
+      ],
+      "taskbarPins": [
+        {
+          "name": "Microsoft Edge",
+          "pinType": "desktopAppLink",
+          "target": "%ProgramFiles(x86)%\\Microsoft\\Edge\\Application\\msedge.exe",
+          "args": "",
+          "workingDir": "",
+          "iconPath": "",
+          "systemShortcut": ""
+        }
+      ],
+      "autoLaunchApp": 0
+    },
+    "formValues": {
+      "configName": "Reception-Kiosk",
+      "profileId": "{B2C3D4E5-2222-3333-4444-555566667777}",
+      "displayName": "Reception Kiosk",
+      "appType": "edge",
+      "edgeSourceType": "url",
+      "edgeUrl": "",
+      "edgeFilePath": "",
+      "edgeKioskType": "fullscreen",
+      "edgeIdleTimeout": "0",
+      "multiEdgeSourceType": "url",
+      "multiEdgeUrl": "https://www.microsoft.com",
+      "multiEdgeFilePath": "",
+      "multiEdgeKioskType": "fullscreen",
+      "win32AutoLaunchArgs": "",
+      "showTaskbar": true,
+      "fileExplorerAccess": "downloads",
+      "groupType": "LocalGroup",
+      "groupName": "",
+      "accountName": ""
+    }
+  }
+}

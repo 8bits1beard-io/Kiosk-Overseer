@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiosk Overseer — Windows 11 Kiosk Configuration Builder</title>
+    <link rel="icon" type="image/png" href="assets/logo-mksa.png">
+    <style>
+        /* ============================================
+           Fonts
+           ============================================ */
+        @font-face {
+            font-family: 'Share Tech Mono';
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: url(assets/fonts/J7aHnp1uDWRBEqV98dVQztYldFcLowEF.woff2) format('woff2');
+        }
+        @font-face {
+            font-family: 'IBM Plex Mono';
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: url(assets/fonts/-F63fjptAgt5VM-kVkqdyU8n1i8q1w.woff2) format('woff2');
+        }
+        @font-face {
+            font-family: 'IBM Plex Mono';
+            font-style: normal;
+            font-weight: 500;
+            font-display: swap;
+            src: url(assets/fonts/-F6qfjptAgt5VM-kVkqdyU8n3twJwlBFgg.woff2) format('woff2');
+        }
+        @font-face {
+            font-family: 'IBM Plex Mono';
+            font-style: normal;
+            font-weight: 600;
+            font-display: swap;
+            src: url(assets/fonts/-F6qfjptAgt5VM-kVkqdyU8n3vAOwlBFgg.woff2) format('woff2');
+        }
+
+        /* ============================================
+           Reset & Base
+           ============================================ */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #0B0F0C;
+            --bg-secondary: #101915;
+            --bg-tertiary: #0f1512;
+            --green: #63FF9A;
+            --green-dim: #57C484;
+            --green-bright: #8AFFC1;
+            --border: #2C5F46;
+            --glow-sm: 0 0 6px rgba(99, 255, 154, 0.25);
+            --glow-md: 0 0 14px rgba(99, 255, 154, 0.3);
+            --glow-lg: 0 0 30px rgba(99, 255, 154, 0.2), 0 0 60px rgba(99, 255, 154, 0.08);
+            --font-display: 'Share Tech Mono', monospace;
+            --font-body: 'IBM Plex Mono', monospace;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg);
+            color: var(--green);
+            line-height: 1.6;
+            overflow-x: hidden;
+            font-size: 15px;
+        }
+
+        /* ============================================
+           CRT Scanline Overlay (full-page)
+           ============================================ */
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.025;
+            background: repeating-linear-gradient(
+                180deg,
+                rgba(99, 255, 154, 0.2) 0px,
+                rgba(99, 255, 154, 0.2) 1px,
+                transparent 2px,
+                transparent 4px
+            );
+        }
+
+        /* ============================================
+           Boot Sequence Animation
+           ============================================ */
+        @keyframes bootFadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes terminalBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { text-shadow: 0 0 4px rgba(99, 255, 154, 0.3); }
+            50% { text-shadow: 0 0 12px rgba(99, 255, 154, 0.5), 0 0 24px rgba(99, 255, 154, 0.15); }
+        }
+
+        @keyframes borderGlow {
+            0%, 100% { border-color: #2C5F46; box-shadow: none; }
+            50% { border-color: rgba(138, 255, 193, 0.5); box-shadow: 0 0 12px rgba(99, 255, 154, 0.12); }
+        }
+
+        @keyframes flicker {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.03); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ============================================
+           Layout
+           ============================================ */
+        .page-wrapper {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* ============================================
+           Hero Section
+           ============================================ */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 60px 24px;
+            background: radial-gradient(ellipse at 50% 30%, #122019 0%, var(--bg) 50%, #070b09 100%);
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 50% 40%, rgba(99, 255, 154, 0.04) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .hero-logo {
+            width: 140px;
+            height: auto;
+            margin-bottom: 8px;
+            animation: bootFadeIn 0.8s ease-out both;
+            filter: drop-shadow(0 0 20px rgba(99, 255, 154, 0.2));
+        }
+
+        .hero-system-line {
+            font-family: var(--font-body);
+            font-size: 0.7rem;
+            color: var(--green-dim);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+            animation: bootFadeIn 0.8s ease-out 0.2s both;
+        }
+
+        .hero-system-line .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 1.1em;
+            background: var(--green);
+            margin-left: 4px;
+            vertical-align: text-bottom;
+            animation: terminalBlink 1s step-end infinite;
+        }
+
+        .hero-title {
+            font-family: var(--font-display);
+            font-size: clamp(2.5rem, 7vw, 4.5rem);
+            font-weight: 400;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--green-bright);
+            text-shadow: 0 0 8px rgba(138, 255, 193, 0.35), 0 0 40px rgba(99, 255, 154, 0.12);
+            margin-bottom: 16px;
+            animation: bootFadeIn 0.8s ease-out 0.4s both;
+        }
+
+        .hero-tagline {
+            font-family: var(--font-body);
+            font-size: clamp(1rem, 2.2vw, 1.3rem);
+            font-weight: 500;
+            color: var(--green);
+            letter-spacing: 0.04em;
+            margin-bottom: 16px;
+            animation: bootFadeIn 0.8s ease-out 0.6s both;
+        }
+
+        .hero-subtitle {
+            font-size: 0.9rem;
+            color: var(--green-dim);
+            max-width: 600px;
+            line-height: 1.7;
+            margin-bottom: 40px;
+            animation: bootFadeIn 0.8s ease-out 0.8s both;
+        }
+
+        .hero-cta {
+            display: inline-block;
+            font-family: var(--font-display);
+            font-size: 1.05rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 16px 40px;
+            border: 2px solid var(--green-bright);
+            border-radius: 4px;
+            color: var(--bg);
+            background: var(--green-bright);
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.25s;
+            animation: bootFadeIn 0.8s ease-out 1s both;
+            box-shadow: 0 0 16px rgba(138, 255, 193, 0.25);
+        }
+
+        .hero-cta:hover {
+            background: transparent;
+            color: var(--green-bright);
+            box-shadow: 0 0 24px rgba(138, 255, 193, 0.4), inset 0 0 24px rgba(138, 255, 193, 0.06);
+            transform: translateY(-2px);
+        }
+
+        .hero-cta:active {
+            transform: scale(0.98) translateY(0);
+        }
+
+        .hero-scroll-hint {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            color: var(--border);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            animation: glowPulse 3s ease-in-out infinite;
+        }
+
+        /* ============================================
+           Section Shared
+           ============================================ */
+        .section {
+            padding: 80px 0;
+        }
+
+        .section-label {
+            font-family: var(--font-body);
+            font-size: 0.65rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--border);
+            margin-bottom: 8px;
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: clamp(1.5rem, 3.5vw, 2rem);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--green-bright);
+            text-shadow: 0 0 6px rgba(138, 255, 193, 0.2);
+            margin-bottom: 12px;
+        }
+
+        .section-desc {
+            font-size: 0.9rem;
+            color: var(--green-dim);
+            max-width: 550px;
+            line-height: 1.7;
+            margin-bottom: 48px;
+        }
+
+        .section-divider {
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--border) 20%, var(--border) 80%, transparent);
+        }
+
+        /* ============================================
+           Features Grid
+           ============================================ */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .feature-card {
+            border: 2px solid var(--border);
+            border-radius: 4px;
+            padding: 28px 24px;
+            background: var(--bg-secondary);
+            position: relative;
+            transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--green-bright), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .feature-card:hover {
+            border-color: rgba(138, 255, 193, 0.45);
+            box-shadow: 0 0 20px rgba(99, 255, 154, 0.08), inset 0 0 0 1px rgba(99, 255, 154, 0.06);
+            transform: translateY(-2px);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-icon {
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+            margin-bottom: 14px;
+            display: block;
+            color: var(--green-bright);
+            text-shadow: var(--glow-sm);
+        }
+
+        .feature-name {
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--green);
+            letter-spacing: 0.03em;
+            margin-bottom: 8px;
+        }
+
+        .feature-desc {
+            font-size: 0.85rem;
+            color: var(--green-dim);
+            line-height: 1.65;
+        }
+
+        /* ============================================
+           How It Works — 3-Step Flow
+           ============================================ */
+        .steps-section {
+            background: var(--bg-tertiary);
+            border-top: 2px solid var(--border);
+            border-bottom: 2px solid var(--border);
+        }
+
+        .steps-row {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr auto 1fr;
+            gap: 0;
+            align-items: start;
+        }
+
+        .step {
+            text-align: center;
+            padding: 0 16px;
+        }
+
+        .step-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 2px solid var(--green-bright);
+            color: var(--green-bright);
+            font-family: var(--font-display);
+            font-size: 1.2rem;
+            margin-bottom: 16px;
+            text-shadow: var(--glow-sm);
+            box-shadow: 0 0 16px rgba(138, 255, 193, 0.12);
+            transition: all 0.3s;
+        }
+
+        .step:hover .step-badge {
+            background: var(--green-bright);
+            color: var(--bg);
+            text-shadow: none;
+            box-shadow: 0 0 24px rgba(138, 255, 193, 0.3);
+        }
+
+        .step-title {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--green);
+            margin-bottom: 8px;
+        }
+
+        .step-desc {
+            font-size: 0.8rem;
+            color: var(--green-dim);
+            line-height: 1.65;
+            max-width: 240px;
+            margin: 0 auto;
+        }
+
+        .step-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-top: 12px;
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            color: var(--border);
+            animation: glowPulse 3s ease-in-out infinite;
+        }
+
+        /* ============================================
+           Footer
+           ============================================ */
+        .site-footer {
+            padding: 40px 24px;
+            text-align: center;
+            border-top: 2px solid var(--border);
+        }
+
+        .footer-text {
+            font-size: 0.8rem;
+            color: var(--green-dim);
+            margin-bottom: 8px;
+        }
+
+        .footer-legal {
+            font-size: 0.7rem;
+            color: var(--border);
+        }
+
+        .footer-legal a {
+            color: var(--green-dim);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-legal a:hover {
+            color: var(--green-bright);
+            text-shadow: var(--glow-sm);
+        }
+
+        /* ============================================
+           Scroll Reveal
+           ============================================ */
+        .reveal {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .reveal.delay-1 { transition-delay: 0.1s; }
+        .reveal.delay-2 { transition-delay: 0.2s; }
+        .reveal.delay-3 { transition-delay: 0.3s; }
+        .reveal.delay-4 { transition-delay: 0.4s; }
+
+        /* ============================================
+           Responsive
+           ============================================ */
+        @media (max-width: 768px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .steps-row {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+
+            .step-arrow {
+                display: none;
+            }
+
+            .hero {
+                padding: 40px 20px;
+                min-height: auto;
+            }
+
+            .section {
+                padding: 50px 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-title {
+                letter-spacing: 0.06em;
+            }
+        }
+
+        /* ============================================
+           Reduced Motion
+           ============================================ */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+
+            .reveal {
+                opacity: 1;
+                transform: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ========== HERO ========== -->
+    <section class="hero">
+        <img src="assets/logo-mksa.png" alt="Kiosk Overseer" class="hero-logo">
+        <div class="hero-system-line">sys.kiosk.overseer // status: online<span class="cursor"></span></div>
+        <h1 class="hero-title">Kiosk Overseer</h1>
+        <p class="hero-tagline">Build Windows 11 Kiosk Configurations Visually</p>
+        <p class="hero-subtitle">Generate validated AssignedAccess XML without hand-editing. Visual app &amp; pin configuration. One-click deployment scripts.</p>
+        <a href="index.html" class="hero-cta">Launch Builder</a>
+        <div class="hero-scroll-hint" aria-hidden="true">scroll</div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ========== FEATURES ========== -->
+    <section class="section">
+        <div class="page-wrapper">
+            <div class="section-label reveal">// capabilities</div>
+            <h2 class="section-title reveal delay-1">What It Does</h2>
+            <p class="section-desc reveal delay-2">Everything you need to configure, validate, and deploy Windows 11 Assigned Access kiosks.</p>
+
+            <div class="features-grid">
+                <div class="feature-card reveal delay-1">
+                    <span class="feature-icon" aria-hidden="true">&lt;/&gt;</span>
+                    <div class="feature-name">Visual XML Builder</div>
+                    <div class="feature-desc">Build complex AssignedAccess XML through an intuitive interface. No hand-editing required.</div>
+                </div>
+                <div class="feature-card reveal delay-2">
+                    <span class="feature-icon" aria-hidden="true">[=]</span>
+                    <div class="feature-name">Multi-Mode Support</div>
+                    <div class="feature-desc">Single-App, Multi-App, and Restricted User kiosk modes. Full Windows 11 namespace coverage.</div>
+                </div>
+                <div class="feature-card reveal delay-3">
+                    <span class="feature-icon" aria-hidden="true">PS&gt;</span>
+                    <div class="feature-name">One-Click Deploy Scripts</div>
+                    <div class="feature-desc">PowerShell scripts, shortcut creators, and Intune-ready exports. Deploy in minutes.</div>
+                </div>
+                <div class="feature-card reveal delay-4">
+                    <span class="feature-icon" aria-hidden="true">{..}</span>
+                    <div class="feature-name">Save &amp; Load Configs</div>
+                    <div class="feature-desc">Save configurations as JSON, load them later, share with your team. Never start from scratch.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ========== HOW IT WORKS ========== -->
+    <section class="section steps-section">
+        <div class="page-wrapper">
+            <div class="section-label reveal">// workflow</div>
+            <h2 class="section-title reveal delay-1">How It Works</h2>
+            <p class="section-desc reveal delay-2">Three steps from configuration to deployment.</p>
+
+            <div class="steps-row reveal delay-3">
+                <div class="step">
+                    <div class="step-badge">1</div>
+                    <div class="step-title">Configure</div>
+                    <div class="step-desc">Choose your kiosk mode, add apps, set pins, and customize layout through the visual interface.</div>
+                </div>
+                <div class="step-arrow" aria-hidden="true">→</div>
+                <div class="step">
+                    <div class="step-badge">2</div>
+                    <div class="step-title">Preview</div>
+                    <div class="step-desc">See your AssignedAccess XML generated in real-time. Validation catches errors before deployment.</div>
+                </div>
+                <div class="step-arrow" aria-hidden="true">→</div>
+                <div class="step">
+                    <div class="step-badge">3</div>
+                    <div class="step-title">Export</div>
+                    <div class="step-desc">Download XML, PowerShell scripts, and helper utilities. Deploy via Intune, PPKG, or locally.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ========== FOOTER ========== -->
+    <footer class="site-footer">
+        <div class="footer-text">Built for IT admins who deploy Windows kiosks.</div>
+        <div class="footer-legal">
+            <a href="https://github.com/8bits1beard-io/Kiosk-Overseer/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">GPL v3.0 License</a>
+        </div>
+    </footer>
+
+    <!-- ========== Scroll Reveal Script ========== -->
+    <script>
+        (function() {
+            const els = document.querySelectorAll('.reveal');
+            if (!els.length) return;
+
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.15 });
+
+            els.forEach(function(el) { observer.observe(el); });
+        })();
+    </script>
+</body>
+</html>
