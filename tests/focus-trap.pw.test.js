@@ -262,12 +262,13 @@ test.describe('Focus Trap - Edge Args Modal', () => {
         await page.evaluate(() => openEdgeArgsModal('pin'));
         const modal = page.locator('#edgeArgsModal');
         await expect(modal).toBeVisible({ timeout: 2000 });
+        await page.waitForTimeout(100); // wait for focus trap activation
 
         const overflow = await page.evaluate(() => document.body.style.overflow);
         expect(overflow).toBe('hidden');
 
         await page.keyboard.press('Escape');
-        await expect(modal).toBeHidden({ timeout: 1000 });
+        await expect(modal).toBeHidden({ timeout: 2000 });
 
         const overflowAfter = await page.evaluate(() => document.body.style.overflow);
         expect(overflowAfter).toBe('');

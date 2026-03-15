@@ -219,6 +219,7 @@ function renderPinListForType(listType) {
 
         return `
         <div class="app-item draggable" role="listitem" data-pin-list="${listType}" data-index="${i}" draggable="true" style="${missingTarget ? 'border-left: 3px solid var(--error-color, #e74c3c);' : ''}">
+            <button type="button" class="reorder-grip" aria-label="Reorder ${escapeAttr(pin.name || 'pin')}" data-reorder-grip data-pin-list="${listType}" data-index="${i}"><span aria-hidden="true">⠿</span></button>
             <div style="display: flex; flex-direction: column; flex: 1; min-width: 0;">
                 <span style="font-weight: 500;">${escapeXml(pin.name || 'Unnamed')}${typeLabel}${linkBadge}${edgeBadge}${missingTarget ? ' <span style="color: var(--error-color, #e74c3c);" title="Target path required">⚠</span>' : ''}</span>
                 <span style="font-size: 0.75rem; ${warningStyle} overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeXml(displayTarget)}${escapeXml(hasArgs)}">${escapeXml(displayTarget)}${escapeXml(hasArgs)}</span>
@@ -844,3 +845,172 @@ function handlePinDragEnd(event) {
     document.querySelectorAll('.app-item.drag-over').forEach(el => el.classList.remove('drag-over'));
     dragPinContext = null;
 }
+
+/* ============================================================================
+   Keyboard Reorder
+   ============================================================================ */
+
+let reorderContext = null;
+
+function announceReorder(message) {
+    const region = document.getElementById('reorderLiveRegion');
+    if (!region) return;
+    // Clear then set to force re-announcement of identical text
+    region.textContent = '';
+    setTimeout(() => { region.textContent = message; }, 50);
+}
+
+function enterReorderMode(grip) {
+    if (reorderContext) exitReorderMode(true);
+
+    const listType = grip.dataset.pinList;
+    const index = parseInt(grip.dataset.index, 10);
+    const pins = listType === 'start' ? state.startPins : state.taskbarPins;
+    if (!pins || !pins[index]) return;
+
+    reorderContext = {
+        listType,
+        originalIndex: index,
+        currentIndex: index,
+        originalOrder: JSON.parse(JSON.stringify(pins)),
+        grip
+    };
+
+    const item = grip.closest('.app-item');
+    if (item) item.classList.add('reorder-active');
+
+    const name = pins[index].name || 'pin';
+    const total = pins.length;
+    announceReorder(`Reordering ${name}. Use arrow keys to move, Enter to confirm, Escape to cancel.`);
+}
+
+function exitReorderMode(cancel) {
+    if (!reorderContext) return;
+
+    const { listType, originalIndex, currentIndex, originalOrder } = reorderContext;
+    const pins = listType === 'start' ? state.startPins : state.taskbarPins;
+    const name = pins[currentIndex]?.name || 'pin';
+    const total = pins.length;
+
+    if (cancel) {
+        // Restore original order
+        pins.length = 0;
+        originalOrder.forEach(p => pins.push(p));
+        announceReorder('Reorder cancelled.');
+    } else {
+        announceReorder(`${name} moved to position ${currentIndex + 1} of ${total}.`);
+    }
+
+    reorderContext = null;
+
+    if (listType === 'start') {
+        renderPinList();
+    } else {
+        renderTaskbarPinList();
+    }
+    updatePreview();
+
+    // Re-focus the grip at the final position
+    const targetIndex = cancel ? originalIndex : currentIndex;
+    requestAnimationFrame(() => {
+        const listId = listType === 'start' ? 'pinList' : 'taskbarPinList';
+        const listEl = document.getElementById(listId);
+        if (!listEl) return;
+        const grip = listEl.querySelector(`[data-reorder-grip][data-index="${targetIndex}"]`);
+        if (grip) grip.focus();
+    });
+}
+
+function moveReorder(direction) {
+    if (!reorderContext) return;
+
+    const { listType, currentIndex } = reorderContext;
+    const pins = listType === 'start' ? state.startPins : state.taskbarPins;
+    const total = pins.length;
+    let newIndex;
+
+    if (direction === 'up') {
+        newIndex = currentIndex - 1;
+    } else if (direction === 'down') {
+        newIndex = currentIndex + 1;
+    } else if (direction === 'home') {
+        newIndex = 0;
+    } else if (direction === 'end') {
+        newIndex = total - 1;
+    }
+
+    if (newIndex < 0 || newIndex >= total || newIndex === currentIndex) return;
+
+    // Swap in data model
+    const [moved] = pins.splice(currentIndex, 1);
+    pins.splice(newIndex, 0, moved);
+    reorderContext.currentIndex = newIndex;
+
+    // Re-render and re-focus
+    const listId = listType === 'start' ? 'pinList' : 'taskbarPinList';
+    if (listType === 'start') {
+        renderPinList();
+    } else {
+        renderTaskbarPinList();
+    }
+
+    // Re-apply active state and focus the grip at new position
+    requestAnimationFrame(() => {
+        if (!reorderContext) return; // reorder may have been confirmed/cancelled
+        const listEl = document.getElementById(listId);
+        if (!listEl) return;
+        const newItem = listEl.querySelector(`[data-index="${newIndex}"]`);
+        if (newItem) newItem.classList.add('reorder-active');
+        const grip = listEl.querySelector(`[data-reorder-grip][data-index="${newIndex}"]`);
+        if (grip) grip.focus();
+    });
+
+    const name = moved.name || 'pin';
+    announceReorder(`${name}, position ${newIndex + 1} of ${total}.`);
+}
+
+function handleReorderKeydown(event) {
+    // If reorder mode is active, handle keys globally (grip may have been re-rendered)
+    if (reorderContext) {
+        switch (event.key) {
+            case 'ArrowUp':
+                event.preventDefault();
+                moveReorder('up');
+                return;
+            case 'ArrowDown':
+                event.preventDefault();
+                moveReorder('down');
+                return;
+            case 'Home':
+                event.preventDefault();
+                moveReorder('home');
+                return;
+            case 'End':
+                event.preventDefault();
+                moveReorder('end');
+                return;
+            case 'Enter':
+            case ' ':
+                event.preventDefault();
+                exitReorderMode(false);
+                return;
+            case 'Escape':
+                event.preventDefault();
+                exitReorderMode(true);
+                return;
+        }
+        return;
+    }
+
+    // Not in reorder mode — Enter/Space on a grip activates reorder mode
+    const grip = event.target.closest('[data-reorder-grip]');
+    if (!grip) return;
+
+    if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        enterReorderMode(grip);
+    }
+}
+
+// Delegate keydown from document for reorder grips
+document.addEventListener('keydown', handleReorderKeydown);
