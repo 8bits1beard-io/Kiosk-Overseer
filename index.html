@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://static.cloudflareinsights.com; font-src 'self'; connect-src 'self' https://cloudflareinsights.com; base-uri 'self'; form-action 'self'">
     <title>Kiosk Overseer (Windows Kiosk Builder)</title>
-    <link rel="stylesheet" href="styles.css?v=2.0.3">
+    <link rel="stylesheet" href="styles.css?v=2.0.4">
     <link rel="icon" type="image/png" href="assets/logo-mksa.png">
 </head>
 <body>
@@ -15,7 +15,7 @@
     <header role="banner">
         <div class="header-top">
             <div class="header-system-label">
-                KIOSK OVERSEER // BUILD 2.0.3
+                KIOSK OVERSEER // BUILD 2.0.4
             </div>
             <nav class="header-actions command-strip" aria-label="Main actions">
                 <button type="button" class="btn-secondary" data-action="loadPreset" data-arg="blank">New</button>
@@ -562,8 +562,8 @@
                     </div>
                 </fieldset>
                     <fieldset class="section">
-                        <legend class="section-header collapsible-header" data-section-key="startMenuPins" aria-expanded="true"></legend>
-                        <div class="section-content collapsible-content">
+                        <legend class="section-header collapsible-header" data-section-key="startMenuPins" aria-expanded="true" role="button" tabindex="0" aria-controls="collapsible-startMenuPins"></legend>
+                        <div class="section-content collapsible-content" id="collapsible-startMenuPins">
                             <div class="sub-panel">
                             <div class="sub-panel-title">PINNED SHORTCUTS</div>
                             <div class="form-group">
@@ -730,8 +730,8 @@
                     </fieldset>
                     <!-- Taskbar Pins Section -->
                     <fieldset class="section">
-                        <legend class="section-header collapsible-header" data-section-key="taskbarLayout" aria-expanded="true"></legend>
-                        <div class="section-content collapsible-content">
+                        <legend class="section-header collapsible-header" data-section-key="taskbarLayout" aria-expanded="true" role="button" tabindex="0" aria-controls="collapsible-taskbarLayout"></legend>
+                        <div class="section-content collapsible-content" id="collapsible-taskbarLayout">
                             <div class="sub-panel">
                             <div class="sub-panel-title">TASKBAR PINS</div>
                             <div class="form-group">
@@ -1146,8 +1146,8 @@
                         </fieldset>
 
                         <fieldset class="section">
-                            <legend class="section-header collapsible-header" data-section-key="deployGuide" aria-expanded="true"></legend>
-                            <div class="section-content collapsible-content">
+                            <legend class="section-header collapsible-header" data-section-key="deployGuide" aria-expanded="true" role="button" tabindex="0" aria-controls="collapsible-deployGuide"></legend>
+                            <div class="section-content collapsible-content" id="collapsible-deployGuide">
                                 <nav class="deploy-tabs" role="tablist" aria-label="Deployment methods">
                                     <button type="button" class="deploy-tab active" role="tab" aria-selected="true" aria-controls="deploy-intune" id="deploy-tab-intune" data-action="switchDeployTab" data-arg="intune">Intune</button>
                                     <button type="button" class="deploy-tab" role="tab" aria-selected="false" aria-controls="deploy-powershell" id="deploy-tab-powershell" data-action="switchDeployTab" data-arg="powershell">PowerShell</button>
@@ -1569,17 +1569,17 @@ if ($taskExists -and $backupExists) {
     <!-- ARIA live region for reorder announcements -->
     <div id="reorderLiveRegion" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
 
-    <script src="dom.js?v=2.0.3"></script>
-    <script src="state.js?v=2.0.3"></script>
-    <script src="helpers.js?v=2.0.3"></script>
-    <script src="toast.js?v=2.0.3"></script>
-    <script src="focusTrap.js?v=2.0.3"></script>
-    <script src="xml.js?v=2.0.3"></script>
-    <script src="validation.js?v=2.0.3"></script>
-    <script src="app.js?v=2.0.3"></script>
-    <script src="apps.js?v=2.0.3"></script>
-    <script src="pins.js?v=2.0.3"></script>
-    <script src="exports.js?v=2.0.3"></script>
-    <script src="config.js?v=2.0.3"></script>
+    <script src="dom.js?v=2.0.4"></script>
+    <script src="state.js?v=2.0.4"></script>
+    <script src="helpers.js?v=2.0.4"></script>
+    <script src="toast.js?v=2.0.4"></script>
+    <script src="focusTrap.js?v=2.0.4"></script>
+    <script src="xml.js?v=2.0.4"></script>
+    <script src="validation.js?v=2.0.4"></script>
+    <script src="app.js?v=2.0.4"></script>
+    <script src="apps.js?v=2.0.4"></script>
+    <script src="pins.js?v=2.0.4"></script>
+    <script src="exports.js?v=2.0.4"></script>
+    <script src="config.js?v=2.0.4"></script>
 </body>
 </html>

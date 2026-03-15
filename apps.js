@@ -247,10 +247,10 @@ function filterCommonApps() {
     if (!search) return;
     const query = search.value.toLowerCase();
     document.querySelectorAll('[data-action="addCommonApp"]').forEach(btn => {
-        btn.style.display = btn.textContent.toLowerCase().includes(query) ? '' : 'none';
+        btn.classList.toggle('hidden', !btn.textContent.toLowerCase().includes(query));
     });
     document.querySelectorAll('.common-app-category').forEach(cat => {
-        const hasVisible = Array.from(cat.querySelectorAll('[data-action="addCommonApp"]')).some(btn => btn.style.display !== 'none');
-        cat.style.display = hasVisible ? '' : 'none';
+        const hasVisible = Array.from(cat.querySelectorAll('[data-action="addCommonApp"]')).some(btn => !btn.classList.contains('hidden'));
+        cat.classList.toggle('hidden', !hasVisible);
     });
 }

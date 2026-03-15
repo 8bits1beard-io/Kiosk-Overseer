@@ -1138,10 +1138,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         runAction(target.dataset.action, target, event);
     });
 
-    document.addEventListener('click', (event) => {
-        const header = event.target.closest('legend.collapsible-header');
-        if (!header) return;
-
+    function toggleCollapsible(header) {
         const content = header.nextElementSibling;
         if (!content || !content.classList.contains('collapsible-content')) return;
 
@@ -1149,6 +1146,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         content.classList.toggle('collapsed');
         const isExpanded = !header.classList.contains('collapsed');
         header.setAttribute('aria-expanded', isExpanded.toString());
+    }
+
+    document.addEventListener('click', (event) => {
+        const header = event.target.closest('legend.collapsible-header');
+        if (!header) return;
+        toggleCollapsible(header);
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        const header = event.target.closest('legend.collapsible-header');
+        if (!header) return;
+        event.preventDefault();
+        toggleCollapsible(header);
     });
 
     document.addEventListener('change', (event) => {
@@ -1207,17 +1218,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         input.addEventListener('blur', () => {
             const error = validateField(fieldId);
             const parent = input.closest('.form-group') || input.parentElement;
+            const errorId = `error-${fieldId}`;
             let errorEl = parent.querySelector('.field-error');
             if (error) {
                 input.classList.add('invalid');
                 if (!errorEl) {
                     errorEl = document.createElement('span');
                     errorEl.className = 'field-error';
+                    errorEl.id = errorId;
+                    errorEl.setAttribute('role', 'alert');
                     parent.appendChild(errorEl);
                 }
                 errorEl.textContent = error;
+                input.setAttribute('aria-describedby', errorId);
             } else {
                 input.classList.remove('invalid');
+                input.removeAttribute('aria-describedby');
                 if (errorEl) errorEl.remove();
             }
         });
