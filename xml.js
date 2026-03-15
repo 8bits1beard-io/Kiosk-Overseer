@@ -10,7 +10,12 @@ function generateXml() {
     xml += `    xmlns:rs5="http://schemas.microsoft.com/AssignedAccess/201810/config"\n`;
     xml += `    xmlns:v3="http://schemas.microsoft.com/AssignedAccess/2020/config"\n`;
     xml += `    xmlns:v4="http://schemas.microsoft.com/AssignedAccess/2021/config"\n`;
-    xml += `    xmlns:v5="http://schemas.microsoft.com/AssignedAccess/2022/config">\n`;
+    // NOTE: Microsoft's namespace versioning has a gap here. v5 = 2022/config (StartPins,
+    // TaskbarLayout), but Exclusions and SpecialGroup elements live in 202010/config — a
+    // separate namespace Microsoft labels "v202010" in their XSD reference. These are two
+    // distinct namespaces; do not substitute one for the other.
+    xml += `    xmlns:v5="http://schemas.microsoft.com/AssignedAccess/2022/config"\n`;
+    xml += `    xmlns:v202010="http://schemas.microsoft.com/AssignedAccess/202010/config">\n`;
 
     xml += `    <Profiles>\n`;
     const profileName = escapeAttr(dom.get('configName').value.trim());
@@ -163,11 +168,15 @@ function buildStartPinsJson() {
         return null;
     }
 
-    return {
+    const result = {
         pinnedList: state.startPins.map(p => {
             // UWP/Store apps use packagedAppId
             if (p.pinType === 'packagedAppId' && p.packagedAppId) {
                 return { packagedAppId: p.packagedAppId };
+            }
+            // Win32 apps with a registered AUMID use desktopAppId (no .lnk required)
+            if (p.pinType === 'desktopAppId' && p.desktopAppId) {
+                return { desktopAppId: p.desktopAppId };
             }
             // Edge with specific URL uses secondaryTile
             if (p.pinType === 'secondaryTile' && p.packagedAppId) {
@@ -187,6 +196,15 @@ function buildStartPinsJson() {
             };
         })
     };
+
+    // applyOnce: when true, pins are applied only once per user and can be changed afterward.
+    // Requires Windows 11 24H2 (Build 26100.3915) or later with KB5062660.
+    const applyOnceEl = document.getElementById('startPinsApplyOnce');
+    if (applyOnceEl && applyOnceEl.checked) {
+        result.applyOnce = true;
+    }
+
+    return result;
 }
 
 function buildTaskbarLayoutXml() {
@@ -244,6 +262,10 @@ function generateAccountConfig() {
         const groupType = dom.get('groupType').value;
         const groupName = dom.get('groupName').value;
         xml += `            <UserGroup Type="${groupType}" Name="${escapeXml(groupName)}"/>\n`;
+    } else if (state.accountType === 'visitor') {
+        // Assigns the kiosk profile to Windows Visitor (guest) accounts.
+        // Requires the 202010/config namespace (xmlns:v202010).
+        xml += `            <v202010:SpecialGroup Name="Visitor"/>\n`;
     }
     // Note: 'global' account type doesn't add anything here - it uses GlobalProfile instead
 
@@ -261,9 +283,9 @@ function generateConfigsSection() {
         const excludeOwner = dom.get('excludeDeviceOwner')?.checked;
         if (excludeOwner) {
             xml += `        <v3:GlobalProfile Id="${profileId}">\n`;
-            xml += `            <v5:Exclusions>\n`;
-            xml += `                <SpecialGroup Name="DeviceOwner"/>\n`;
-            xml += `            </v5:Exclusions>\n`;
+            xml += `            <v202010:Exclusions>\n`;
+            xml += `                <v202010:SpecialGroup Name="DeviceOwner"/>\n`;
+            xml += `            </v202010:Exclusions>\n`;
             xml += `        </v3:GlobalProfile>\n`;
         } else {
             xml += `        <v3:GlobalProfile Id="${profileId}"/>\n`;

@@ -278,15 +278,17 @@ function updateAccountTypeOptions() {
     const globalBtn = dom.get('accountGlobal');
     const autoBtn = dom.get('accountAuto');
     const existingBtn = dom.get('accountExisting');
+    const visitorBtn = dom.get('accountVisitor');
 
     if (state.mode === 'restricted') {
-        // Show group and global options for restricted mode
+        // Show group, global, and visitor options for restricted mode
         groupBtn.classList.remove('hidden');
         globalBtn.classList.remove('hidden');
+        if (visitorBtn) visitorBtn.classList.remove('hidden');
         autoBtn.classList.add('hidden');
         existingBtn.classList.add('hidden');
 
-        // Force restricted mode to group/global accounts only
+        // Force restricted mode away from auto/existing
         if (state.accountType === 'auto' || state.accountType === 'existing') {
             setAccountType('group');
         }
@@ -296,6 +298,7 @@ function updateAccountTypeOptions() {
         globalBtn.classList.add('hidden');
         autoBtn.classList.remove('hidden');
         existingBtn.classList.remove('hidden');
+        if (visitorBtn) visitorBtn.classList.remove('hidden');
 
         // If currently on group or global, switch back to auto
         if (state.accountType === 'group' || state.accountType === 'global') {
@@ -309,34 +312,49 @@ function setAccountType(type) {
 
     const autoBtn = dom.get('accountAuto');
     const existingBtn = dom.get('accountExisting');
+    const visitorBtn = dom.get('accountVisitor');
     const groupBtn = dom.get('accountGroup');
     const globalBtn = dom.get('accountGlobal');
     const autoConfig = dom.get('autoLogonConfig');
     const existingConfig = dom.get('existingAccountConfig');
+    const visitorConfig = dom.get('visitorConfig');
     const groupConfig = dom.get('groupAccountConfig');
     const globalConfig = dom.get('globalProfileConfig');
 
     // Update button states
     autoBtn.classList.toggle('active', type === 'auto');
     existingBtn.classList.toggle('active', type === 'existing');
+    visitorBtn.classList.toggle('active', type === 'visitor');
     groupBtn.classList.toggle('active', type === 'group');
     globalBtn.classList.toggle('active', type === 'global');
     autoBtn.setAttribute('aria-pressed', type === 'auto');
     existingBtn.setAttribute('aria-pressed', type === 'existing');
+    visitorBtn.setAttribute('aria-pressed', type === 'visitor');
     groupBtn.setAttribute('aria-pressed', type === 'group');
     globalBtn.setAttribute('aria-pressed', type === 'global');
 
     // Show/hide config panels
     autoConfig.classList.toggle('hidden', type !== 'auto');
     existingConfig.classList.toggle('hidden', type !== 'existing');
+    visitorConfig.classList.toggle('hidden', type !== 'visitor');
     groupConfig.classList.toggle('hidden', type !== 'group');
     globalConfig.classList.toggle('hidden', type !== 'global');
     autoConfig.setAttribute('aria-hidden', type !== 'auto');
     existingConfig.setAttribute('aria-hidden', type !== 'existing');
+    visitorConfig.setAttribute('aria-hidden', type !== 'visitor');
     groupConfig.setAttribute('aria-hidden', type !== 'group');
     globalConfig.setAttribute('aria-hidden', type !== 'global');
 
     updatePreview();
+}
+
+function updatePinMethodUI() {
+    const method = dom.get('pinMethod')?.value;
+    const group = document.getElementById('pinDesktopAppIdGroup');
+    if (group) {
+        group.classList.toggle('hidden', method !== 'desktopAppId');
+        group.setAttribute('aria-hidden', method !== 'desktopAppId');
+    }
 }
 
 function updateAppTypeUI() {

@@ -159,7 +159,7 @@ function renderPinListForType(listType) {
 
     if (!list || !count) return;
 
-    // Filter pins for taskbar (only desktop and packaged, no secondary tiles)
+    // Filter pins for taskbar (only desktop link and packaged; desktopAppId and secondary tiles are Start-only)
     const displayPins = listType === 'taskbar'
         ? pins.filter(pin => pin.pinType === 'desktopAppLink' || pin.pinType === 'packagedAppId')
         : pins;
@@ -174,6 +174,7 @@ function renderPinListForType(listType) {
     list.innerHTML = displayPins.map((pin, i) => {
         const isUwp = pin.pinType === 'packagedAppId';
         const isSecondaryTile = pin.pinType === 'secondaryTile';
+        const isDesktopAppId = pin.pinType === 'desktopAppId';
 
         // Determine display target
         let displayTarget;
@@ -181,6 +182,8 @@ function renderPinListForType(listType) {
             displayTarget = pin.packagedAppId;
         } else if (isSecondaryTile) {
             displayTarget = pin.args || pin.packagedAppId || 'Edge site tile';
+        } else if (isDesktopAppId) {
+            displayTarget = pin.desktopAppId || '(no AUMID - click to edit)';
         } else {
             displayTarget = pin.target
                 ? truncate(pin.target, 40)
@@ -192,6 +195,7 @@ function renderPinListForType(listType) {
 
         // Badges
         const typeLabel = isUwp ? '<span class="pin-badge pin-badge--uwp">UWP</span>' : '';
+        const aumidBadge = isDesktopAppId ? '<span class="pin-badge pin-badge--uwp">AUMID</span>' : '';
         const linkBadge = pin.pinType === 'desktopAppLink'
             ? '<span class="pin-badge pin-badge--lnk">.lnk</span>'
             : '';
@@ -220,7 +224,7 @@ function renderPinListForType(listType) {
         <div class="app-item draggable${missingTarget ? ' pin-item--missing' : ''}" role="listitem" data-pin-list="${listType}" data-index="${i}" draggable="true">
             <button type="button" class="reorder-grip" aria-label="Reorder ${escapeAttr(pin.name || 'pin')}" data-reorder-grip data-pin-list="${listType}" data-index="${i}"><span aria-hidden="true">⠿</span></button>
             <div class="pin-item-body">
-                <span class="pin-item-name">${escapeXml(pin.name || 'Unnamed')}${typeLabel}${linkBadge}${edgeBadge}${missingTarget ? ' <span class="pin-item-target--error" title="Target path required">⚠</span>' : ''}</span>
+                <span class="pin-item-name">${escapeXml(pin.name || 'Unnamed')}${typeLabel}${aumidBadge}${linkBadge}${edgeBadge}${missingTarget ? ' <span class="pin-item-target--error" title="Target path required">⚠</span>' : ''}</span>
                 <span class="pin-item-target${missingTarget ? ' pin-item-target--error' : ''}" title="${escapeXml(displayTarget)}${escapeXml(hasArgs)}">${escapeXml(displayTarget)}${escapeXml(hasArgs)}</span>
                 ${edgeWarning}
             </div>
@@ -272,15 +276,27 @@ function addPin() {
         return;
     }
 
-    // Determine pin type from the selected app
+    // Determine pin type from the selected app and chosen format
     const app = state.allowedApps.find(a => a.value === target);
     const isAumid = app && app.type === 'aumid';
+    const pinMethod = document.getElementById('pinMethod')?.value || 'desktopAppLink';
+    const pinDesktopAppIdValue = document.getElementById('pinDesktopAppIdValue')?.value?.trim();
 
     if (isAumid) {
         state.startPins.push({
             name: name,
             pinType: 'packagedAppId',
             packagedAppId: target
+        });
+    } else if (pinMethod === 'desktopAppId') {
+        if (!pinDesktopAppIdValue) {
+            showToast('App User Model ID is required when using AUMID pin format.', { type: 'error' });
+            return;
+        }
+        state.startPins.push({
+            name: name,
+            pinType: 'desktopAppId',
+            desktopAppId: pinDesktopAppIdValue
         });
     } else {
         state.startPins.push({
@@ -301,7 +317,12 @@ function addPin() {
     dom.get('pinArgs').value = '';
     dom.get('pinWorkingDir').value = '';
     dom.get('pinIconPath').value = '';
+    const pinMethodEl = document.getElementById('pinMethod');
+    if (pinMethodEl) pinMethodEl.value = 'desktopAppLink';
+    const pinDesktopAppIdEl = document.getElementById('pinDesktopAppIdValue');
+    if (pinDesktopAppIdEl) pinDesktopAppIdEl.value = '';
     updateEdgeArgsVisibility('pin', 'pinTarget', 'pinEdgeArgsGroup');
+    if (typeof updatePinMethodUI === 'function') updatePinMethodUI();
 
     renderPinList();
     updatePreview();
@@ -605,6 +626,12 @@ function duplicatePin(index) {
             pinType: 'packagedAppId',
             packagedAppId: pin.packagedAppId || ''
         };
+    } else if (pin.pinType === 'desktopAppId') {
+        clone = {
+            name: buildUniquePinName(`${pin.name || 'App'} Copy`, 'start'),
+            pinType: 'desktopAppId',
+            desktopAppId: pin.desktopAppId || ''
+        };
     } else {
         clone = {
             name: buildUniquePinName(`${pin.name || 'Shortcut'} Copy`, 'start'),
@@ -627,9 +654,10 @@ function copyPinToTaskbar(index) {
     const pin = state.startPins[index];
     if (!pin) return;
 
-    // Only desktop and packaged app pins can be copied to taskbar (not secondary tiles)
+    // Only desktopAppLink and packagedAppId pins can be added to taskbar
+    // (secondary tiles and desktopAppId are Start-menu-only)
     if (pin.pinType !== 'desktopAppLink' && pin.pinType !== 'packagedAppId') {
-        showToast('Edge site tiles cannot be pinned to the taskbar.', { type: 'error' });
+        showToast('Only shortcut (.lnk) and UWP pins can be added to the taskbar.', { type: 'error' });
         return;
     }
 

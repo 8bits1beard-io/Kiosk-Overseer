@@ -27,8 +27,13 @@ function fillTemplate(template, values) {
 
 const PS_TOUCH_KEYBOARD_BLOCK = `
     # Touch Keyboard - Force auto-invoke for touchscreen devices
+    # WARNING: The registry keys below (HKLM\\SOFTWARE\\Microsoft\\TabletTip\\1.7) are
+    # undocumented and not officially supported by Microsoft. Microsoft's documentation
+    # states that touch keyboard auto-invoke requires no configuration on touch-enabled
+    # devices. These keys have been observed to work on some Windows 11 builds but may
+    # stop working after OS updates. Use with caution and test on your target build.
     if (-not $ShortcutsOnly) {
-        Write-Log -Action "Touch Keyboard" -Status "Info" -Message "Enabling auto-invoke for touchscreen devices"
+        Write-Log -Action "Touch Keyboard" -Status "Info" -Message "Enabling auto-invoke for touchscreen devices (uses undocumented registry keys - test on target build)"
         try {
             reg add "HKLM\\SOFTWARE\\Microsoft\\TabletTip\\1.7" /v EnableDesktopModeAutoInvoke /t REG_DWORD /d 1 /f | Out-Null
             reg add "HKLM\\SOFTWARE\\Microsoft\\TabletTip\\1.7" /v TouchKeyboardTapInvoke /t REG_DWORD /d 2 /f | Out-Null
@@ -252,6 +257,7 @@ const PS_DEPLOY_SCRIPT = `#Requires -RunAsAdministrator
     Creates a CMTrace-compatible log file in %ProgramData%\\KioskOverseer\\Logs.
     If Windows blocks the script, right-click the .ps1 file, choose Properties, then Unblock.
 #>
+{{edgePolicyComment}}
 param(
     [switch]$ShortcutsOnly
 )
@@ -392,7 +398,7 @@ try {
     $supportedEditions = @("Pro", "Enterprise", "Education", "IoTEnterprise", "IoTEnterpriseS", "ServerRdsh")
     $isSupported = $supportedEditions | Where-Object { $edition -like "*$_*" }
     if (-not $isSupported) {
-        Write-Log -Action "Windows Edition Check" -Status "Error" -Message "Unsupported edition: $edition. AssignedAccess requires Enterprise, Education, or IoT Enterprise."
+        Write-Log -Action "Windows Edition Check" -Status "Error" -Message "Unsupported edition: $edition. AssignedAccess requires Windows 11 Pro, Enterprise, Education, or IoT Enterprise."
         Save-Log
         exit 1
     }
@@ -1106,12 +1112,40 @@ function downloadPowerShell() {
         manifestPs = PS_MANIFEST_BLOCK;
     }
 
+    // Generate Edge kiosk policy guidance comment when Edge is the kiosk app
+    let edgePolicyComment = '';
+    const isEdgeSingle = state.mode === 'single' && dom.get('appType').value === 'edge';
+    const isEdgeMultiAutoLaunch = state.mode !== 'single' && state.autoLaunchApp !== null &&
+        state.allowedApps[state.autoLaunchApp] &&
+        isEdgeApp(state.allowedApps[state.autoLaunchApp].value);
+    if (isEdgeSingle || isEdgeMultiAutoLaunch) {
+        edgePolicyComment = `# Edge Kiosk Mode Configuration Notes
+# The kiosk app type and URL are configured via XML (ClassicAppArguments / AutoLaunchArguments).
+# Additional Edge kiosk behavior can be configured via Group Policy or Intune using these policies:
+#
+#   KioskDeleteBrowsingDataOnExit     - Delete browsing data when kiosk session ends (recommended)
+#   KioskAddressBarEditingEnabled     - Allow/deny URL editing (public browsing mode only)
+#   NewTabPageLocation                - Override the new tab page URL
+#   HomepageLocation                  - Set the home page URL
+#   HomepageIsNewTabPage              - Use new tab page as home page
+#
+# Policy path (Group Policy):
+#   Computer Configuration > Administrative Templates > Microsoft Edge
+# Policy path (Intune / CSP):
+#   ./Device/Vendor/MSFT/Policy/Config/Edge~Policy~microsoft_edge~...
+#
+# Reference: https://learn.microsoft.com/en-us/deployedge/microsoft-edge-configure-kiosk-mode
+#
+`;
+    }
+
     const ps1 = fillTemplate(PS_DEPLOY_SCRIPT, {
         shortcutsJson: shortcutsJson,
         xml: xml,
         sentryPs: sentryPs,
         touchKeyboardPs: touchKeyboardPs,
-        manifestPs: manifestPs
+        manifestPs: manifestPs,
+        edgePolicyComment: edgePolicyComment
     });
 
     downloadFile(ps1, getConfigFileName('ps1'), 'text/plain');

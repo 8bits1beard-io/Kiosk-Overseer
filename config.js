@@ -142,7 +142,8 @@ function applyConfigSnapshot(payload) {
 
     // Normalize account type based on mode
     let normalizedAccount = savedAccount;
-    if (savedMode === 'restricted' && savedAccount !== 'group' && savedAccount !== 'global') {
+    const restrictedAccountTypes = ['group', 'global', 'visitor'];
+    if (savedMode === 'restricted' && !restrictedAccountTypes.includes(savedAccount)) {
         normalizedAccount = 'group';
     }
     if (savedMode !== 'restricted' && (savedAccount === 'group' || savedAccount === 'global')) {
@@ -386,7 +387,8 @@ const actionHandlers = {
     dismissWelcome,
     toggleTheme,
     updateSentryUI,
-    copyXmlPreview
+    copyXmlPreview,
+    updatePinMethodUI
 };
 
 // Debounce guard for download actions to prevent double-triggering

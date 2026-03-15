@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://static.cloudflareinsights.com; font-src 'self'; connect-src 'self' https://cloudflareinsights.com; base-uri 'self'; form-action 'self'">
     <title>Kiosk Overseer (Windows Kiosk Builder)</title>
-    <link rel="stylesheet" href="styles.css?v=2.0.6">
+    <link rel="stylesheet" href="styles.css?v=2.0.7">
     <link rel="icon" type="image/png" href="assets/logo-mksa.png">
 </head>
 <body>
@@ -15,7 +15,7 @@
     <header role="banner">
         <div class="header-top">
             <div class="header-system-label">
-                KIOSK OVERSEER // BUILD 2.0.6
+                KIOSK OVERSEER // BUILD 2.0.7
             </div>
             <nav class="header-actions command-strip" aria-label="Main actions">
                 <button type="button" class="btn-secondary" data-action="loadPreset" data-arg="blank">New</button>
@@ -564,6 +564,19 @@
                     <fieldset class="section">
                         <legend class="section-header collapsible-header" data-section-key="startMenuPins" aria-expanded="true" role="button" tabindex="0" aria-controls="collapsible-startMenuPins"></legend>
                         <div class="section-content collapsible-content" id="collapsible-startMenuPins">
+                            <div class="form-group">
+                                <div class="checkbox-group">
+                                    <span class="toggle-switch">
+                                        <input type="checkbox" role="switch" id="startPinsApplyOnce" data-change="updatePreview" aria-describedby="startPinsApplyOnce-tooltip">
+                                        <span class="toggle-slider" aria-hidden="true"></span>
+                                    </span>
+                                    <label for="startPinsApplyOnce" class="with-tooltip">
+                                        Apply Pins Once
+                                        <button type="button" class="tooltip-icon" aria-label="Help for Apply Pins Once" aria-describedby="startPinsApplyOnce-tooltip">?</button>
+                                        <span class="tooltip-content" id="startPinsApplyOnce-tooltip" role="tooltip">When enabled, Start menu pins are applied only once per user at first logon and can be changed afterward. When disabled, pins are re-applied every time the user logs in, preventing customization. Requires Windows 11 24H2 (Build 26100.3915) with KB5062660 or later.</span>
+                                    </label>
+                                </div>
+                            </div>
                             <div class="sub-panel">
                             <div class="sub-panel-title">PINNED SHORTCUTS</div>
                             <div class="form-group">
@@ -603,6 +616,21 @@
                                             <label for="pinIconPath" class="field-label">Icon Path (optional)</label>
                                             <input type="text" id="pinIconPath" placeholder="e.g., C:\path\to\icon.ico" class="field-full">
                                         </div>
+                                    </div>
+                                    <div id="pinMethodGroup">
+                                        <label for="pinMethod" class="field-label with-tooltip">
+                                            Pin Format
+                                            <button type="button" class="tooltip-icon" aria-label="Help for Pin Format" aria-describedby="pinMethod-tooltip">?</button>
+                                            <span class="tooltip-content" id="pinMethod-tooltip" role="tooltip"><strong>Shortcut (.lnk):</strong> Creates a .lnk shortcut in the Start menu. Requires running the PowerShell script to create the shortcut file on disk.<br><br><strong>App User Model ID (AUMID):</strong> Pins the app using its registered AUMID directly — no .lnk file needed. Only works for apps with a registered AUMID (most Win32 apps do not have one).</span>
+                                        </label>
+                                        <select id="pinMethod" class="field-full" data-change="updatePinMethodUI">
+                                            <option value="desktopAppLink">Shortcut (.lnk)</option>
+                                            <option value="desktopAppId">App User Model ID (AUMID)</option>
+                                        </select>
+                                    </div>
+                                    <div id="pinDesktopAppIdGroup" class="hidden" aria-hidden="true">
+                                        <label for="pinDesktopAppIdValue" class="field-label">App User Model ID *</label>
+                                        <input type="text" id="pinDesktopAppIdValue" placeholder="e.g., Microsoft.WindowsNotepad_8wekyb3d8bbwe!App" class="field-full" data-config-skip="true">
                                     </div>
                                         </div>
                                     </details>
@@ -895,6 +923,7 @@
                             <div class="toggle-group" role="group" aria-labelledby="account-type-label" id="accountTypeButtons">
                                 <button type="button" id="accountAuto" class="active" data-action="setAccountType" data-arg="auto" aria-pressed="true">Auto Logon (Managed)</button>
                                 <button type="button" id="accountExisting" data-action="setAccountType" data-arg="existing" aria-pressed="false">Existing Account</button>
+                                <button type="button" id="accountVisitor" data-action="setAccountType" data-arg="visitor" aria-pressed="false">Visitor</button>
                                 <button type="button" id="accountGroup" class="hidden" data-action="setAccountType" data-arg="group" aria-pressed="false">User Group</button>
                                 <button type="button" id="accountGlobal" class="hidden" data-action="setAccountType" data-arg="global" aria-pressed="false">Global Profile</button>
                             </div>
@@ -943,6 +972,12 @@
                                 </label>
                                 <input type="text" id="groupName" placeholder="e.g., KioskUsers or DOMAIN\\KioskGroup" data-change="updatePreview" aria-describedby="groupName-tooltip">
                             </div>
+                        </div>
+
+                        <div id="visitorConfig" class="hidden" aria-hidden="true">
+                            <p class="hint">
+                                <strong>Visitor:</strong> This profile applies to Windows Visitor accounts — temporary accounts for users without a local or domain profile. No account name configuration is needed.
+                            </p>
                         </div>
 
                         <div id="globalProfileConfig" class="hidden" aria-hidden="true">
@@ -1570,17 +1605,17 @@ if ($taskExists -and $backupExists) {
     <!-- ARIA live region for reorder announcements -->
     <div id="reorderLiveRegion" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
 
-    <script src="dom.js?v=2.0.6"></script>
-    <script src="state.js?v=2.0.6"></script>
-    <script src="helpers.js?v=2.0.6"></script>
-    <script src="toast.js?v=2.0.6"></script>
-    <script src="focusTrap.js?v=2.0.6"></script>
-    <script src="xml.js?v=2.0.6"></script>
-    <script src="validation.js?v=2.0.6"></script>
-    <script src="app.js?v=2.0.6"></script>
-    <script src="apps.js?v=2.0.6"></script>
-    <script src="pins.js?v=2.0.6"></script>
-    <script src="exports.js?v=2.0.6"></script>
-    <script src="config.js?v=2.0.6"></script>
+    <script src="dom.js?v=2.0.7"></script>
+    <script src="state.js?v=2.0.7"></script>
+    <script src="helpers.js?v=2.0.7"></script>
+    <script src="toast.js?v=2.0.7"></script>
+    <script src="focusTrap.js?v=2.0.7"></script>
+    <script src="xml.js?v=2.0.7"></script>
+    <script src="validation.js?v=2.0.7"></script>
+    <script src="app.js?v=2.0.7"></script>
+    <script src="apps.js?v=2.0.7"></script>
+    <script src="pins.js?v=2.0.7"></script>
+    <script src="exports.js?v=2.0.7"></script>
+    <script src="config.js?v=2.0.7"></script>
 </body>
 </html>

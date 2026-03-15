@@ -308,6 +308,47 @@ describe('buildStartPinsJson()', () => {
         // tileId should strip non-alphanumeric chars
         assert.strictEqual(tile.tileId, 'MSEdge._pin_MySite');
     });
+
+    it('generates desktopAppId for Win32 app with AUMID', () => {
+        state.startPins = [
+            { pinType: 'desktopAppId', name: 'Notepad', desktopAppId: 'Microsoft.WindowsNotepad_8wekyb3d8bbwe!App' }
+        ];
+
+        const result = buildStartPinsJson();
+        assert.ok(result);
+        assert.strictEqual(result.pinnedList[0].desktopAppId, 'Microsoft.WindowsNotepad_8wekyb3d8bbwe!App');
+        assert.ok(!result.pinnedList[0].desktopAppLink, 'desktopAppLink should not be present');
+    });
+
+    it('falls back to desktopAppLink when desktopAppId pin has no desktopAppId value', () => {
+        state.startPins = [
+            { pinType: 'desktopAppId', name: 'Notepad', desktopAppId: '' }
+        ];
+
+        const result = buildStartPinsJson();
+        // Empty desktopAppId falls through to desktopAppLink (falsy check)
+        assert.ok(result.pinnedList[0].desktopAppLink);
+    });
+
+    it('does not include applyOnce when checkbox is unchecked', () => {
+        state.startPins = [
+            { pinType: 'desktopAppLink', name: 'Notepad' }
+        ];
+        setDomChecked('startPinsApplyOnce', false);
+
+        const result = buildStartPinsJson();
+        assert.strictEqual(result.applyOnce, undefined);
+    });
+
+    it('includes applyOnce: true when checkbox is checked', () => {
+        state.startPins = [
+            { pinType: 'desktopAppLink', name: 'Notepad' }
+        ];
+        setDomChecked('startPinsApplyOnce', true);
+
+        const result = buildStartPinsJson();
+        assert.strictEqual(result.applyOnce, true);
+    });
 });
 
 // ---------------------------------------------------------------------------
@@ -447,14 +488,24 @@ describe('generateConfigsSection()', () => {
         assert.ok(!xml.includes('Exclusions'));
     });
 
-    it('generates GlobalProfile with DeviceOwner exclusion', () => {
+    it('generates GlobalProfile with DeviceOwner exclusion using v202010 namespace', () => {
         state.accountType = 'global';
         setDomChecked('excludeDeviceOwner', true);
 
         const xml = generateConfigsSection();
         assert.ok(xml.includes('v3:GlobalProfile'));
-        assert.ok(xml.includes('v5:Exclusions'));
-        assert.ok(xml.includes('SpecialGroup Name="DeviceOwner"'));
+        assert.ok(xml.includes('v202010:Exclusions'), 'Exclusions must use v202010 namespace, not v5');
+        assert.ok(xml.includes('v202010:SpecialGroup Name="DeviceOwner"'), 'SpecialGroup must use v202010 namespace');
+        assert.ok(!xml.includes('v5:Exclusions'), 'v5:Exclusions is wrong namespace — Exclusions lives in 202010/config');
+    });
+
+    it('generates Visitor SpecialGroup for visitor account type', () => {
+        state.accountType = 'visitor';
+
+        const xml = generateConfigsSection();
+        assert.ok(xml.includes('v202010:SpecialGroup Name="Visitor"'));
+        assert.ok(xml.includes('DefaultProfile'));
+        assert.ok(xml.includes('<Config>'));
     });
 });
 
@@ -477,6 +528,8 @@ describe('XML correctness', () => {
         assert.ok(xml.includes('xmlns:v3='));
         assert.ok(xml.includes('xmlns:v4='));
         assert.ok(xml.includes('xmlns:v5='));
+        assert.ok(xml.includes('xmlns:v202010="http://schemas.microsoft.com/AssignedAccess/202010/config"'),
+            'v202010 namespace required for Exclusions and SpecialGroup elements');
     });
 
     it('starts with XML declaration', () => {
