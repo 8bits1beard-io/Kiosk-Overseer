@@ -366,16 +366,24 @@ function dismissCallout(idOrElement) {
     callout.classList.add('hidden');
 }
 
+let welcomeTrap = null;
+
 function showWelcome() {
     if (localStorage.getItem('welcomeDismissed')) return;
     const modal = document.getElementById('welcomeModal');
-    if (modal) modal.classList.remove('hidden');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    if (!welcomeTrap) {
+        welcomeTrap = createFocusTrap(modal, { onClose: dismissWelcome });
+    }
+    welcomeTrap.activate();
 }
 
 function dismissWelcome() {
     const modal = document.getElementById('welcomeModal');
     if (modal) modal.classList.add('hidden');
     localStorage.setItem('welcomeDismissed', '1');
+    if (welcomeTrap) welcomeTrap.deactivate();
 }
 
 function initCallouts() {
@@ -763,6 +771,7 @@ function getEdgeArgsTargetConfigFromId(id) {
 }
 
 let edgeArgsModalContext = null;
+let edgeArgsTrap = null;
 
 const EDGE_ARGS_FIELD_MAP = {
     pin: { targetId: 'pinTarget', argsId: 'pinArgs' },
@@ -802,6 +811,10 @@ function openEdgeArgsModal(prefix) {
     const modal = document.getElementById('edgeArgsModal');
     modal.classList.remove('hidden');
     modal.setAttribute('aria-hidden', 'false');
+    if (!edgeArgsTrap) {
+        edgeArgsTrap = createFocusTrap(modal, { onClose: hideEdgeArgsModal });
+    }
+    edgeArgsTrap.activate();
 }
 
 function applyEdgeArgsModal() {
@@ -820,6 +833,7 @@ function hideEdgeArgsModal() {
     modal.classList.add('hidden');
     modal.setAttribute('aria-hidden', 'true');
     edgeArgsModalContext = null;
+    if (edgeArgsTrap) edgeArgsTrap.deactivate();
 }
 
 function getEdgeUrl() {
