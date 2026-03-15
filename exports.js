@@ -1126,7 +1126,7 @@ function downloadPowerShell() {
 function downloadShortcutsScript() {
     // Single-app mode doesn't use Start Menu pins or taskbar
     if (state.mode === 'single') {
-        alert('Shortcut Creator is not needed for single-app kiosks. Single-app mode runs one app fullscreen without Start Menu access.');
+        showToast('Shortcut Creator is not needed for single-app kiosks. Single-app mode runs one app fullscreen without Start Menu access.', { type: 'info' });
         return;
     }
 

@@ -107,13 +107,13 @@ async function loadConfigFile(file, handle) {
     try {
         parsed = JSON.parse(text);
     } catch (e) {
-        alert('This file is not valid JSON.');
+        showToast('This file is not valid JSON.', { type: 'error' });
         return;
     }
 
     const normalized = normalizeConfigPayload(parsed);
     if (!normalized.ok) {
-        alert(normalized.error);
+        showToast(normalized.error, { type: 'error' });
         return;
     }
 
@@ -123,7 +123,7 @@ async function loadConfigFile(file, handle) {
 
     applyConfigSnapshot(normalized.payload);
     configFileHandle = handle || null;
-    alert('Configuration loaded.');
+    showToast('Configuration loaded.', { type: 'success' });
 }
 
 function handleConfigImport(event) {

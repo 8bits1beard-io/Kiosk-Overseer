@@ -258,17 +258,17 @@ function addPin() {
     const iconPath = dom.get('pinIconPath').value.trim();
 
     if (!target) {
-        alert('Please select an allowed app.');
+        showToast('Please select an allowed app.', { type: 'error' });
         return;
     }
 
     if (!name) {
-        alert('Shortcut Name is required.');
+        showToast('Shortcut Name is required.', { type: 'error' });
         return;
     }
 
     if (state.startPins.find(p => p.name.toLowerCase() === name.toLowerCase())) {
-        alert('A shortcut with this name already exists.');
+        showToast('A shortcut with this name already exists.', { type: 'error' });
         return;
     }
 
@@ -316,12 +316,12 @@ function addTaskbarPin() {
 
     // Must have selected an app
     if (!presetSelect || !presetSelect.value) {
-        alert('Please select an allowed app.');
+        showToast('Please select an allowed app.', { type: 'error' });
         return;
     }
 
     if (!name) {
-        alert('Taskbar pin name is required.');
+        showToast('Taskbar pin name is required.', { type: 'error' });
         return;
     }
 
@@ -365,12 +365,12 @@ function addEdgeSecondaryTile() {
     const tileId = dom.get('edgeTileId').value.trim();
 
     if (!name || !url) {
-        alert('Edge tile name and URL/file path are required.');
+        showToast('Edge tile name and URL/file path are required.', { type: 'error' });
         return;
     }
 
     if (state.startPins.find(p => p.name.toLowerCase() === name.toLowerCase())) {
-        alert('A pin with this name already exists.');
+        showToast('A pin with this name already exists.', { type: 'error' });
         return;
     }
 
@@ -456,7 +456,7 @@ function saveEditPin() {
 
     const name = dom.get('editPinName').value.trim();
     if (!name) {
-        alert('Pin name is required.');
+        showToast('Pin name is required.', { type: 'error' });
         return;
     }
 
@@ -474,7 +474,7 @@ function saveEditPin() {
         pin.tileId = dom.get('editTileId').value.trim();
         const url = dom.get('editTileUrl').value.trim();
         if (!url) {
-            alert('Tile URL or file path is required.');
+            showToast('Tile URL or file path is required.', { type: 'error' });
             return;
         }
         pin.args = url;
@@ -497,17 +497,17 @@ function saveTaskbarPin() {
     const target = dom.get('editTaskbarPinTarget').value.trim();
 
     if (!name) {
-        alert('Taskbar pin name is required.');
+        showToast('Taskbar pin name is required.', { type: 'error' });
         return;
     }
 
     if (type === 'packagedAppId' && !value) {
-        alert('Packaged app ID is required.');
+        showToast('Packaged app ID is required.', { type: 'error' });
         return;
     }
 
     if (type === 'desktopAppLink' && !target) {
-        alert('Target path is required for taskbar shortcuts.');
+        showToast('Target path is required for taskbar shortcuts.', { type: 'error' });
         return;
     }
 
@@ -629,20 +629,20 @@ function copyPinToTaskbar(index) {
 
     // Only desktop and packaged app pins can be copied to taskbar (not secondary tiles)
     if (pin.pinType !== 'desktopAppLink' && pin.pinType !== 'packagedAppId') {
-        alert('Edge site tiles cannot be pinned to the taskbar.');
+        showToast('Edge site tiles cannot be pinned to the taskbar.', { type: 'error' });
         return;
     }
 
     // Check if already on taskbar
     if (pin.pinType === 'packagedAppId') {
         if (state.taskbarPins.some(p => p.pinType === 'packagedAppId' && p.packagedAppId === pin.packagedAppId)) {
-            alert('This app is already pinned to the taskbar.');
+            showToast('This app is already pinned to the taskbar.', { type: 'info' });
             return;
         }
     } else {
         const targetMatch = pin.target || pin.systemShortcut;
         if (targetMatch && state.taskbarPins.some(p => p.target === targetMatch || p.systemShortcut === targetMatch)) {
-            alert('This app is already pinned to the taskbar.');
+            showToast('This app is already pinned to the taskbar.', { type: 'info' });
             return;
         }
     }
@@ -674,7 +674,7 @@ function pinAllowedToStart(index) {
 
     if (app.type === 'aumid') {
         if (state.startPins.some(p => p.pinType === 'packagedAppId' && p.packagedAppId === app.value)) {
-            alert('This app is already pinned to Start.');
+            showToast('This app is already pinned to Start.', { type: 'info' });
             return;
         }
         state.startPins.push({
@@ -684,7 +684,7 @@ function pinAllowedToStart(index) {
         });
     } else {
         if (state.startPins.some(p => p.pinType === 'desktopAppLink' && p.target === app.value)) {
-            alert('This app is already pinned to Start.');
+            showToast('This app is already pinned to Start.', { type: 'info' });
             return;
         }
         state.startPins.push({
@@ -707,7 +707,7 @@ function pinAllowedToTaskbar(index) {
 
     if (app.type === 'aumid') {
         if (state.taskbarPins.some(p => p.pinType === 'packagedAppId' && p.packagedAppId === app.value)) {
-            alert('This app is already pinned to the taskbar.');
+            showToast('This app is already pinned to the taskbar.', { type: 'info' });
             return;
         }
         state.taskbarPins.push({
@@ -720,7 +720,7 @@ function pinAllowedToTaskbar(index) {
         });
     } else {
         if (state.taskbarPins.some(p => p.pinType === 'desktopAppLink' && p.target === app.value)) {
-            alert('This app is already pinned to the taskbar.');
+            showToast('This app is already pinned to the taskbar.', { type: 'info' });
             return;
         }
         state.taskbarPins.push({
@@ -745,7 +745,7 @@ function addAllowedEdgeTile(index) {
 
     const isEdge = isEdgeApp(app.value) || app.value === 'Microsoft.MicrosoftEdge.Stable_8wekyb3d8bbwe!App';
     if (!isEdge) {
-        alert('Edge site tiles require Microsoft Edge in the allowed apps list.');
+        showToast('Edge site tiles require Microsoft Edge in the allowed apps list.', { type: 'error' });
         return;
     }
 
@@ -758,7 +758,7 @@ function addAllowedEdgeTile(index) {
     if (!url) return;
 
     if (state.startPins.some(p => p.name.toLowerCase() === name.toLowerCase())) {
-        alert('A pin with this name already exists.');
+        showToast('A pin with this name already exists.', { type: 'error' });
         return;
     }
 

@@ -655,7 +655,7 @@ function buildEdgeArgsFromUi(prefix, options = {}) {
     );
     if (!url) {
         if (!suppressAlert) {
-            alert('Edge kiosk mode requires a URL or local file path.');
+            showToast('Edge kiosk mode requires a URL or local file path.', { type: 'error' });
         }
         return '';
     }
@@ -679,7 +679,7 @@ function buildBrowserArgsFromUi(prefix, targetValue, options = {}) {
     );
     if (!url) {
         if (!suppressAlert) {
-            alert('Kiosk mode requires a URL or local file path.');
+            showToast('Kiosk mode requires a URL or local file path.', { type: 'error' });
         }
         return '';
     }

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://static.cloudflareinsights.com; font-src 'self'; connect-src 'self' https://cloudflareinsights.com; base-uri 'self'; form-action 'self'">
     <title>Kiosk Overseer (Windows Kiosk Builder)</title>
-    <link rel="stylesheet" href="styles.css?v=2.0.0">
+    <link rel="stylesheet" href="styles.css?v=2.0.1">
     <link rel="icon" type="image/png" href="assets/logo-mksa.png">
 </head>
 <body>
@@ -15,7 +15,7 @@
     <header role="banner">
         <div class="header-top">
             <div class="header-system-label">
-                KIOSK OVERSEER // BUILD 2.0.0
+                KIOSK OVERSEER // BUILD 2.0.1
             </div>
             <nav class="header-actions command-strip" aria-label="Main actions">
                 <button type="button" class="btn-secondary" data-action="loadPreset" data-arg="blank">New</button>
@@ -1563,15 +1563,19 @@ if ($taskExists -and $backupExists) {
         </div>
     </div>
 
-    <script src="dom.js?v=2.0.0"></script>
-    <script src="state.js?v=2.0.0"></script>
-    <script src="helpers.js?v=2.0.0"></script>
-    <script src="xml.js?v=2.0.0"></script>
-    <script src="validation.js?v=2.0.0"></script>
-    <script src="app.js?v=2.0.0"></script>
-    <script src="apps.js?v=2.0.0"></script>
-    <script src="pins.js?v=2.0.0"></script>
-    <script src="exports.js?v=2.0.0"></script>
-    <script src="config.js?v=2.0.0"></script>
+    <!-- Toast notification container -->
+    <div id="toastContainer" class="toast-container" aria-live="polite" aria-relevant="additions"></div>
+
+    <script src="dom.js?v=2.0.1"></script>
+    <script src="state.js?v=2.0.1"></script>
+    <script src="helpers.js?v=2.0.1"></script>
+    <script src="toast.js?v=2.0.1"></script>
+    <script src="xml.js?v=2.0.1"></script>
+    <script src="validation.js?v=2.0.1"></script>
+    <script src="app.js?v=2.0.1"></script>
+    <script src="apps.js?v=2.0.1"></script>
+    <script src="pins.js?v=2.0.1"></script>
+    <script src="exports.js?v=2.0.1"></script>
+    <script src="config.js?v=2.0.1"></script>
 </body>
 </html>
