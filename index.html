@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://static.cloudflareinsights.com; font-src 'self'; connect-src 'self' https://cloudflareinsights.com; base-uri 'self'; form-action 'self'">
     <title>Kiosk Overseer (Windows Kiosk Builder)</title>
-    <link rel="stylesheet" href="styles.css?v=2.0.4">
+    <link rel="stylesheet" href="styles.css?v=2.0.6">
     <link rel="icon" type="image/png" href="assets/logo-mksa.png">
 </head>
 <body>
@@ -15,11 +15,11 @@
     <header role="banner">
         <div class="header-top">
             <div class="header-system-label">
-                KIOSK OVERSEER // BUILD 2.0.4
+                KIOSK OVERSEER // BUILD 2.0.6
             </div>
             <nav class="header-actions command-strip" aria-label="Main actions">
                 <button type="button" class="btn-secondary" data-action="loadPreset" data-arg="blank">New</button>
-                <select id="presetSelect" data-change="loadPresetFromSelect" aria-label="Load example configuration" class="btn-secondary" style="min-width: 140px;">
+                <select id="presetSelect" data-change="loadPresetFromSelect" aria-label="Load example configuration" class="btn-secondary preset-select">
                     <option value="" disabled selected>Load Example...</option>
                     <option value="edgeFullscreen">Edge Fullscreen Kiosk</option>
                     <option value="edgePublic">Edge Public Browsing</option>
@@ -216,14 +216,14 @@
                                         <button type="button" class="tooltip-icon" aria-label="Help for Key Combination" aria-describedby="breakoutKey-tooltip">?</button>
                                         <span class="tooltip-content" id="breakoutKey-tooltip" role="tooltip">The key combination to exit kiosk mode. Choose modifier keys and a final key. Avoid common shortcuts like Ctrl+C or Ctrl+V. Something obscure like Ctrl+Alt+K works well.</span>
                                     </label>
-                                    <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;" role="group" aria-labelledby="breakoutKey-label">
-                                        <label style="display: flex; align-items: center; gap: 4px; font-weight: normal;">
+                                    <div class="breakout-key-row" role="group" aria-labelledby="breakoutKey-label">
+                                        <label class="breakout-key-label">
                                             <input type="checkbox" id="breakoutCtrl" checked data-change="updateBreakoutPreview|updatePreview"> Ctrl
                                         </label>
-                                        <label style="display: flex; align-items: center; gap: 4px; font-weight: normal;">
+                                        <label class="breakout-key-label">
                                             <input type="checkbox" id="breakoutAlt" checked data-change="updateBreakoutPreview|updatePreview"> Alt
                                         </label>
-                                        <label style="display: flex; align-items: center; gap: 4px; font-weight: normal;">
+                                        <label class="breakout-key-label">
                                             <input type="checkbox" id="breakoutShift" data-change="updateBreakoutPreview|updatePreview"> Shift
                                         </label>
                                         <span aria-hidden="true">+</span>
@@ -327,19 +327,19 @@
                                     <strong>NOTE:</strong> Common apps use default installation paths. If an app is installed in a custom location, use "Add Application" above instead.
                                 </p>
                                 <div style="margin-bottom: 8px;">
-                                    <input type="search" id="commonAppSearch" placeholder="Filter apps..." class="btn-small" style="width: 100%;" data-config-skip="true">
+                                    <input type="search" id="commonAppSearch" placeholder="Filter apps..." class="btn-small field-full" data-config-skip="true">
                                 </div>
                                 <div role="group" aria-labelledby="commonApps-label">
-                                    <div class="common-app-category" style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
-                                        <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">Browsers:</strong>
+                                    <div class="common-app-category">
+                                        <strong class="category-title">Browsers:</strong>
                                         <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="edge">Edge</button>
                                         <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="chrome">Chrome</button>
                                         <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="firefox">Firefox</button>
                                         <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="brave">Brave</button>
                                         <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="island">Island</button>
                                     </div>
-                                    <div class="common-app-category" style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
-                                        <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">System Utilities:</strong>
+                                    <div class="common-app-category">
+                                        <strong class="category-title">System Utilities:</strong>
                                         <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="osk">On-Screen Keyboard</button>
                                         <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="touchKeyboard">Touch Keyboard</button>
                                         <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="volume">Volume Control</button>
@@ -353,24 +353,24 @@
                                         <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="powershell7">PowerShell 7.x</button>
                                         <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="terminal">Windows Terminal</button>
                                     </div>
-                                    <div class="common-app-category" style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
-                                        <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">Productivity:</strong>
+                                    <div class="common-app-category">
+                                        <strong class="category-title">Productivity:</strong>
                                         <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="calculator">Calculator</button>
                                         <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="notepad">Notepad</button>
                                         <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="paint">Paint</button>
                                         <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="snipSketch">Snipping Tool</button>
                                         <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="stickyNotes">Sticky Notes</button>
                                     </div>
-                                    <div class="common-app-category" style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
-                                        <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">Media &amp; Communication:</strong>
+                                    <div class="common-app-category">
+                                        <strong class="category-title">Media &amp; Communication:</strong>
                                         <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="photos">Photos</button>
                                         <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="camera">Camera</button>
                                         <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="movies">Movies &amp; TV</button>
                                         <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="teams">Teams</button>
                                         <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="zoom">Zoom</button>
                                     </div>
-                                    <div class="common-app-category" style="display: flex; gap: 5px; flex-wrap: wrap;">
-                                        <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">Microsoft Office:</strong>
+                                    <div class="common-app-category">
+                                        <strong class="category-title">Microsoft Office:</strong>
                                         <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="word">Word</button>
                                         <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="excel">Excel</button>
                                         <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="powerpoint">PowerPoint</button>
@@ -572,41 +572,41 @@
                                     <button type="button" class="tooltip-icon" aria-label="Help for Add Shortcut" aria-describedby="addShortcut-tooltip">?</button>
                                     <span class="tooltip-content" id="addShortcut-tooltip" role="tooltip">Pins an allowed app to the Start menu. Select an app, optionally edit the name, and add it. Edge shortcuts may ignore custom name/icon; use Edge secondary tiles for site-specific names.</span>
                                 </label>
-                                <div style="display: flex; flex-direction: column; gap: 8px; padding: 10px; background: var(--bg-tertiary); border-radius: var(--frame-radius);">
+                                <div class="pin-form-card">
                                     <div>
-                                        <label for="pinTargetPreset" style="font-size: 0.75rem; color: var(--text-secondary);">Allowed App *</label>
-                                        <select id="pinTargetPreset" data-change="applyPinTargetPreset" style="width: 100%;">
+                                        <label for="pinTargetPreset" class="field-label">Allowed App *</label>
+                                        <select id="pinTargetPreset" data-change="applyPinTargetPreset" class="field-full">
                                             <option value="">Select an allowed app</option>
                                         </select>
                                     </div>
                                     <div>
-                                        <label for="pinName" style="font-size: 0.75rem; color: var(--text-secondary);">Shortcut Name *</label>
-                                        <input type="text" id="pinName" placeholder="Auto-filled from app selection" style="width: 100%;">
+                                        <label for="pinName" class="field-label">Shortcut Name *</label>
+                                        <input type="text" id="pinName" placeholder="Auto-filled from app selection" class="field-full">
                                     </div>
                                     <input type="hidden" id="pinTarget">
                                     <details class="pin-advanced-options">
                                         <summary class="btn-secondary btn-small">Advanced Options</summary>
                                         <div class="pin-advanced-body">
                                     <div>
-                                        <label for="pinArgs" style="font-size: 0.75rem; color: var(--text-secondary);">Arguments (optional)</label>
-                                        <input type="text" id="pinArgs" placeholder="e.g., --kiosk https://example.com --edge-kiosk-type=fullscreen" style="width: 100%;">
+                                        <label for="pinArgs" class="field-label">Arguments (optional)</label>
+                                        <input type="text" id="pinArgs" placeholder="e.g., --kiosk https://example.com --edge-kiosk-type=fullscreen" class="field-full">
                                     </div>
                                     <div id="pinEdgeArgsGroup" class="edge-args-group hidden" aria-hidden="true">
                                         <button type="button" class="btn-secondary btn-small" data-action="openEdgeArgsModal" data-arg="pin">Configure Kiosk Mode...</button>
                                     </div>
-                                    <div style="display: flex; gap: 8px;">
-                                        <div style="flex: 1;">
-                                            <label for="pinWorkingDir" style="font-size: 0.75rem; color: var(--text-secondary);">Working Directory (optional)</label>
-                                            <input type="text" id="pinWorkingDir" placeholder="e.g., C:\Program Files (x86)\Microsoft\Edge\Application" style="width: 100%;">
+                                    <div class="flex-row">
+                                        <div class="flex-1">
+                                            <label for="pinWorkingDir" class="field-label">Working Directory (optional)</label>
+                                            <input type="text" id="pinWorkingDir" placeholder="e.g., C:\Program Files (x86)\Microsoft\Edge\Application" class="field-full">
                                         </div>
-                                        <div style="flex: 1;">
-                                            <label for="pinIconPath" style="font-size: 0.75rem; color: var(--text-secondary);">Icon Path (optional)</label>
-                                            <input type="text" id="pinIconPath" placeholder="e.g., C:\path\to\icon.ico" style="width: 100%;">
+                                        <div class="flex-1">
+                                            <label for="pinIconPath" class="field-label">Icon Path (optional)</label>
+                                            <input type="text" id="pinIconPath" placeholder="e.g., C:\path\to\icon.ico" class="field-full">
                                         </div>
                                     </div>
                                         </div>
                                     </details>
-                                    <button type="button" class="btn-primary" data-action="addPin" style="align-self: flex-start;">Add Shortcut</button>
+                                    <button type="button" class="btn-primary btn-align-start" data-action="addPin">Add Shortcut</button>
                                 </div>
                             </div>
                             </div>
@@ -619,36 +619,36 @@
                                     <button type="button" class="tooltip-icon" aria-label="Help for Edge Site Tile" aria-describedby="edgeTile-tooltip">?</button>
                                     <span class="tooltip-content" id="edgeTile-tooltip" role="tooltip">Creates an Edge site tile with a custom name. The icon always comes from Edge and can’t be overridden.</span>
                                 </label>
-                                <div style="display: flex; flex-direction: column; gap: 8px; padding: 10px; background: var(--bg-tertiary); border-radius: var(--frame-radius);">
-                                    <div style="display: flex; gap: 8px;">
-                                        <div style="flex: 1;">
-                                            <label for="edgeTileName" style="font-size: 0.75rem; color: var(--text-secondary);">Tile Name *</label>
-                                            <input type="text" id="edgeTileName" placeholder="e.g., Company Portal" style="width: 100%;">
+                                <div class="pin-form-card">
+                                    <div class="flex-row">
+                                        <div class="flex-1">
+                                            <label for="edgeTileName" class="field-label">Tile Name *</label>
+                                            <input type="text" id="edgeTileName" placeholder="e.g., Company Portal" class="field-full">
                                         </div>
-                                        <div style="flex: 1;">
-                                            <label for="edgeTileId" style="font-size: 0.75rem; color: var(--text-secondary);">Tile ID (optional)</label>
-                                            <input type="text" id="edgeTileId" placeholder="e.g., CompanyPortal" style="width: 100%;">
+                                        <div class="flex-1">
+                                            <label for="edgeTileId" class="field-label">Tile ID (optional)</label>
+                                            <input type="text" id="edgeTileId" placeholder="e.g., CompanyPortal" class="field-full">
                                         </div>
                                     </div>
-                                    <div style="display: flex; gap: 8px; align-items: center;">
+                                    <div class="flex-row" style="align-items: center;">
                                         <div style="min-width: 140px;">
-                                            <label for="edgeTileSourceType" style="font-size: 0.75rem; color: var(--text-secondary);">Content Source</label>
-                                            <select id="edgeTileSourceType" data-change="updateEdgeTileSourceUI" style="width: 100%;">
+                                            <label for="edgeTileSourceType" class="field-label">Content Source</label>
+                                            <select id="edgeTileSourceType" data-change="updateEdgeTileSourceUI" class="field-full">
                                                 <option value="url">Web URL</option>
                                                 <option value="file">Local File</option>
                                             </select>
                                         </div>
-                                        <div id="edgeTileUrlConfig" style="flex: 1;">
-                                            <input type="text" id="edgeTileUrl" placeholder="https://example.com" style="width: 100%;">
+                                        <div id="edgeTileUrlConfig" class="flex-1">
+                                            <input type="text" id="edgeTileUrl" placeholder="https://example.com" class="field-full">
                                         </div>
-                                        <div id="edgeTileFileConfig" class="hidden" style="flex: 1;" aria-hidden="true">
-                                            <input type="text" id="edgeTileFilePath" placeholder="C:\\Kiosk\\index.html" style="width: 100%;">
+                                        <div id="edgeTileFileConfig" class="hidden flex-1" aria-hidden="true">
+                                            <input type="text" id="edgeTileFilePath" placeholder="C:\\Kiosk\\index.html" class="field-full">
                                         </div>
                                     </div>
-                                    <div style="font-size: 0.7rem; color: var(--text-secondary); font-style: italic;">
+                                    <div class="field-note">
                                         NOTE: Secondary tiles use the normal Edge profile (not InPrivate by default). Apply Edge policies if you need private-session behavior.
                                     </div>
-                                    <button type="button" class="btn-primary" data-action="addEdgeSecondaryTile" style="align-self: flex-start;">Add Edge Site Tile</button>
+                                    <button type="button" class="btn-primary btn-align-start" data-action="addEdgeSecondaryTile">Add Edge Site Tile</button>
                                 </div>
                             </div>
                             </div>
@@ -666,61 +666,61 @@
                             <div id="pinEditPanel" class="sub-panel hidden" aria-live="polite">
                                 <div class="sub-panel-title">EDIT PIN</div>
                                 <label>Edit Pin <span id="editPinType" style="font-weight: 400; color: var(--text-secondary);"></span></label>
-                                <div style="display: flex; flex-direction: column; gap: 10px; padding: 12px; background: var(--bg-tertiary); border-radius: var(--frame-radius);">
+                                <div class="pin-edit-card">
                                     <div>
-                                        <label for="editPinName" style="font-size: 0.75rem; color: var(--text-secondary);">Name *</label>
-                                        <input type="text" id="editPinName" style="width: 100%;">
+                                        <label for="editPinName" class="field-label">Name *</label>
+                                        <input type="text" id="editPinName" class="field-full">
                                     </div>
                                     <div id="editDesktopFields">
-                                        <div style="display: flex; gap: 8px;">
-                                            <div style="flex: 2;">
-                                                <label for="editPinTarget" style="font-size: 0.75rem; color: var(--text-secondary);">Target Path</label>
-                                                <input type="text" id="editPinTarget" style="width: 100%;">
+                                        <div class="flex-row">
+                                            <div class="flex-2">
+                                                <label for="editPinTarget" class="field-label">Target Path</label>
+                                                <input type="text" id="editPinTarget" class="field-full">
                                             </div>
-                                            <div style="flex: 1;">
-                                                <label for="editPinArgs" style="font-size: 0.75rem; color: var(--text-secondary);">Arguments</label>
-                                                <input type="text" id="editPinArgs" style="width: 100%;">
+                                            <div class="flex-1">
+                                                <label for="editPinArgs" class="field-label">Arguments</label>
+                                                <input type="text" id="editPinArgs" class="field-full">
                                             </div>
                                         </div>
-                                        <div id="editPinEdgeArgsGroup" class="edge-args-group hidden" aria-hidden="true" style="margin-top: 8px;">
+                                        <div id="editPinEdgeArgsGroup" class="edge-args-group hidden" aria-hidden="true">
                                             <button type="button" class="btn-secondary btn-small" data-action="openEdgeArgsModal" data-arg="editPin">Configure Kiosk Mode...</button>
                                         </div>
-                                        <div style="display: flex; gap: 8px; margin-top: 8px;">
-                                            <div style="flex: 1;">
-                                                <label for="editPinWorkingDir" style="font-size: 0.75rem; color: var(--text-secondary);">Working Directory</label>
-                                                <input type="text" id="editPinWorkingDir" style="width: 100%;">
+                                        <div class="flex-row" style="margin-top: 8px;">
+                                            <div class="flex-1">
+                                                <label for="editPinWorkingDir" class="field-label">Working Directory</label>
+                                                <input type="text" id="editPinWorkingDir" class="field-full">
                                             </div>
-                                            <div style="flex: 1;">
-                                                <label for="editPinIconPath" style="font-size: 0.75rem; color: var(--text-secondary);">Icon Path</label>
-                                                <input type="text" id="editPinIconPath" style="width: 100%;">
+                                            <div class="flex-1">
+                                                <label for="editPinIconPath" class="field-label">Icon Path</label>
+                                                <input type="text" id="editPinIconPath" class="field-full">
                                             </div>
                                         </div>
                                         <div style="margin-top: 8px;">
-                                            <label for="editPinShortcutPath" style="font-size: 0.75rem; color: var(--text-secondary);">System Shortcut Path (optional)</label>
-                                            <input type="text" id="editPinShortcutPath" style="width: 100%;" placeholder="e.g. %ProgramData%\Microsoft\Windows\Start Menu\Programs\MyApp.lnk" title="Path to an existing .lnk shortcut file on the system. Use this instead of Target Path to reference a pre-existing Start Menu shortcut.">
+                                            <label for="editPinShortcutPath" class="field-label">System Shortcut Path (optional)</label>
+                                            <input type="text" id="editPinShortcutPath" class="field-full" placeholder="e.g. %ProgramData%\Microsoft\Windows\Start Menu\Programs\MyApp.lnk" title="Path to an existing .lnk shortcut file on the system. Use this instead of Target Path to reference a pre-existing Start Menu shortcut.">
                                         </div>
                                     </div>
                                     <div id="editPackagedFields" class="hidden">
-                                        <label for="editPinPackagedAppId" style="font-size: 0.75rem; color: var(--text-secondary);">Packaged App ID</label>
-                                        <input type="text" id="editPinPackagedAppId" style="width: 100%;">
+                                        <label for="editPinPackagedAppId" class="field-label">Packaged App ID</label>
+                                        <input type="text" id="editPinPackagedAppId" class="field-full">
                                     </div>
                                     <div id="editSecondaryFields" class="hidden">
-                                        <div style="display: flex; gap: 8px;">
-                                            <div style="flex: 1;">
-                                                <label for="editTileId" style="font-size: 0.75rem; color: var(--text-secondary);">Tile ID</label>
-                                                <input type="text" id="editTileId" style="width: 100%;">
+                                        <div class="flex-row">
+                                            <div class="flex-1">
+                                                <label for="editTileId" class="field-label">Tile ID</label>
+                                                <input type="text" id="editTileId" class="field-full">
                                             </div>
-                                            <div style="flex: 2;">
-                                                <label for="editTileUrl" style="font-size: 0.75rem; color: var(--text-secondary);">URL or file path</label>
-                                                <input type="text" id="editTileUrl" style="width: 100%;">
+                                            <div class="flex-2">
+                                                <label for="editTileUrl" class="field-label">URL or file path</label>
+                                                <input type="text" id="editTileUrl" class="field-full">
                                             </div>
                                         </div>
                                         <div style="margin-top: 8px;">
-                                            <label for="editTilePackagedAppId" style="font-size: 0.75rem; color: var(--text-secondary);">Edge Packaged App ID</label>
-                                            <input type="text" id="editTilePackagedAppId" style="width: 100%;">
+                                            <label for="editTilePackagedAppId" class="field-label">Edge Packaged App ID</label>
+                                            <input type="text" id="editTilePackagedAppId" class="field-full">
                                         </div>
                                     </div>
-                                    <div style="display: flex; gap: 8px;">
+                                    <div class="flex-row">
                                         <button type="button" class="btn-primary btn-small" data-action="saveEditPin">Save Changes</button>
                                         <button type="button" class="btn-secondary btn-small" data-action="cancelEditPin">Cancel</button>
                                     </div>
@@ -740,16 +740,16 @@
                                     <button type="button" class="tooltip-icon" aria-label="Help for Taskbar Pins" aria-describedby="taskbarPins-tooltip">?</button>
                                     <span class="tooltip-content" id="taskbarPins-tooltip" role="tooltip">Pins apps to the taskbar for quick access. If you set an icon path, that file must exist on the device.</span>
                                 </label>
-                                <div style="display: flex; flex-direction: column; gap: 8px; padding: 10px; background: var(--bg-tertiary); border-radius: var(--frame-radius);">
+                                <div class="pin-form-card">
                                     <div>
-                                        <label for="taskbarPinTargetPreset" style="font-size: 0.75rem; color: var(--text-secondary);">Allowed App *</label>
-                                        <select id="taskbarPinTargetPreset" data-change="applyTaskbarPinTargetPreset" style="width: 100%;">
+                                        <label for="taskbarPinTargetPreset" class="field-label">Allowed App *</label>
+                                        <select id="taskbarPinTargetPreset" data-change="applyTaskbarPinTargetPreset" class="field-full">
                                             <option value="">Select an allowed app</option>
                                         </select>
                                     </div>
                                     <div>
-                                        <label for="taskbarPinName" style="font-size: 0.75rem; color: var(--text-secondary);">Name *</label>
-                                        <input type="text" id="taskbarPinName" placeholder="Auto-filled from app selection" style="width: 100%;">
+                                        <label for="taskbarPinName" class="field-label">Name *</label>
+                                        <input type="text" id="taskbarPinName" placeholder="Auto-filled from app selection" class="field-full">
                                     </div>
                                     <input type="hidden" id="taskbarPinType" value="desktopAppLink">
                                     <input type="hidden" id="taskbarPinTarget">
@@ -760,24 +760,24 @@
                                             <summary class="btn-secondary btn-small">Advanced Options</summary>
                                             <div class="pin-advanced-body">
                                             <div>
-                                                <label for="taskbarPinArgs" style="font-size: 0.75rem; color: var(--text-secondary);">Arguments</label>
-                                                <input type="text" id="taskbarPinArgs" placeholder="--kiosk https://example.com" style="width: 100%;">
+                                                <label for="taskbarPinArgs" class="field-label">Arguments</label>
+                                                <input type="text" id="taskbarPinArgs" placeholder="--kiosk https://example.com" class="field-full">
                                             </div>
                                             <div>
-                                                <label for="taskbarPinWorkingDir" style="font-size: 0.75rem; color: var(--text-secondary);">Working Directory</label>
-                                                <input type="text" id="taskbarPinWorkingDir" placeholder="C:\\Program Files\\Microsoft\\Edge\\Application" style="width: 100%;">
+                                                <label for="taskbarPinWorkingDir" class="field-label">Working Directory</label>
+                                                <input type="text" id="taskbarPinWorkingDir" placeholder="C:\\Program Files\\Microsoft\\Edge\\Application" class="field-full">
                                             </div>
                                             <div>
-                                                <label for="taskbarPinIconPath" style="font-size: 0.75rem; color: var(--text-secondary);">Icon Path (optional, shortcuts only)</label>
-                                                <input type="text" id="taskbarPinIconPath" placeholder="C:\\path\\to\\icon.ico" style="width: 100%;">
+                                                <label for="taskbarPinIconPath" class="field-label">Icon Path (optional, shortcuts only)</label>
+                                                <input type="text" id="taskbarPinIconPath" placeholder="C:\\path\\to\\icon.ico" class="field-full">
                                             </div>
-                                        <div id="taskbarPinEdgeArgsGroup" class="edge-args-group hidden" aria-hidden="true" style="margin-top: 8px;">
+                                        <div id="taskbarPinEdgeArgsGroup" class="edge-args-group hidden" aria-hidden="true">
                                             <button type="button" class="btn-secondary btn-small" data-action="openEdgeArgsModal" data-arg="taskbarPin">Configure Kiosk Mode...</button>
                                         </div>
                                             </div>
                                         </details>
                                     </div>
-                                    <button type="button" class="btn-primary" data-action="addTaskbarPin" style="align-self: flex-start;">Add Taskbar Pin</button>
+                                    <button type="button" class="btn-primary btn-align-start" data-action="addTaskbarPin">Add Taskbar Pin</button>
                                 </div>
                             </div>
                             </div>
@@ -795,48 +795,48 @@
                             <div id="taskbarEditPanel" class="sub-panel hidden" aria-live="polite">
                                 <div class="sub-panel-title">EDIT TASKBAR PIN</div>
                                 <label>Edit Taskbar Pin</label>
-                                <div style="display: flex; flex-direction: column; gap: 10px; padding: 12px; background: var(--bg-tertiary); border-radius: var(--frame-radius);">
-                                    <div style="display: flex; gap: 8px;">
-                                        <div style="flex: 1;">
-                                            <label for="editTaskbarPinName" style="font-size: 0.75rem; color: var(--text-secondary);">Name *</label>
-                                            <input type="text" id="editTaskbarPinName" style="width: 100%;">
+                                <div class="pin-edit-card">
+                                    <div class="flex-row">
+                                        <div class="flex-1">
+                                            <label for="editTaskbarPinName" class="field-label">Name *</label>
+                                            <input type="text" id="editTaskbarPinName" class="field-full">
                                         </div>
                                         <div style="width: 180px;">
-                                            <label for="editTaskbarPinType" style="font-size: 0.75rem; color: var(--text-secondary);">Type</label>
-                                            <select id="editTaskbarPinType" data-change="updateEditTaskbarPinTypeUI" style="width: 100%;">
+                                            <label for="editTaskbarPinType" class="field-label">Type</label>
+                                            <select id="editTaskbarPinType" data-change="updateEditTaskbarPinTypeUI" class="field-full">
                                                 <option value="desktopAppLink">Desktop App (Target Path)</option>
                                                 <option value="packagedAppId">Packaged App ID</option>
                                             </select>
                                         </div>
                                     </div>
                                     <div id="editTaskbarPackagedFields" class="hidden" aria-hidden="true">
-                                        <label for="editTaskbarPinValue" style="font-size: 0.75rem; color: var(--text-secondary);">Packaged App ID *</label>
-                                        <input type="text" id="editTaskbarPinValue" style="width: 100%;">
+                                        <label for="editTaskbarPinValue" class="field-label">Packaged App ID *</label>
+                                        <input type="text" id="editTaskbarPinValue" class="field-full">
                                     </div>
                                     <div id="editTaskbarDesktopFields">
-                                        <div style="display: flex; gap: 8px;">
-                                            <div style="flex: 2;">
-                                                <label for="editTaskbarPinTarget" style="font-size: 0.75rem; color: var(--text-secondary);">Target Path *</label>
-                                                <input type="text" id="editTaskbarPinTarget" style="width: 100%;">
+                                        <div class="flex-row">
+                                            <div class="flex-2">
+                                                <label for="editTaskbarPinTarget" class="field-label">Target Path *</label>
+                                                <input type="text" id="editTaskbarPinTarget" class="field-full">
                                             </div>
-                                            <div style="flex: 1;">
-                                                <label for="editTaskbarPinArgs" style="font-size: 0.75rem; color: var(--text-secondary);">Arguments</label>
-                                                <input type="text" id="editTaskbarPinArgs" style="width: 100%;">
+                                            <div class="flex-1">
+                                                <label for="editTaskbarPinArgs" class="field-label">Arguments</label>
+                                                <input type="text" id="editTaskbarPinArgs" class="field-full">
                                             </div>
                                         </div>
                                         <div style="margin-top: 8px;">
-                                            <label for="editTaskbarPinWorkingDir" style="font-size: 0.75rem; color: var(--text-secondary);">Working Directory</label>
-                                            <input type="text" id="editTaskbarPinWorkingDir" style="width: 100%;">
+                                            <label for="editTaskbarPinWorkingDir" class="field-label">Working Directory</label>
+                                            <input type="text" id="editTaskbarPinWorkingDir" class="field-full">
                                         </div>
                                         <div style="margin-top: 8px;">
-                                            <label for="editTaskbarPinIconPath" style="font-size: 0.75rem; color: var(--text-secondary);">Icon Path (optional, shortcuts only)</label>
-                                            <input type="text" id="editTaskbarPinIconPath" style="width: 100%;">
+                                            <label for="editTaskbarPinIconPath" class="field-label">Icon Path (optional, shortcuts only)</label>
+                                            <input type="text" id="editTaskbarPinIconPath" class="field-full">
                                         </div>
-                                        <div id="editTaskbarEdgeArgsGroup" class="edge-args-group hidden" aria-hidden="true" style="margin-top: 8px;">
+                                        <div id="editTaskbarEdgeArgsGroup" class="edge-args-group hidden" aria-hidden="true">
                                             <button type="button" class="btn-secondary btn-small" data-action="openEdgeArgsModal" data-arg="editTaskbar">Configure Kiosk Mode...</button>
                                         </div>
                                     </div>
-                                    <div style="display: flex; gap: 8px;">
+                                    <div class="flex-row">
                                         <button type="button" class="btn-primary btn-small" data-action="saveTaskbarPin">Save Changes</button>
                                         <button type="button" class="btn-secondary btn-small" data-action="cancelTaskbarPinEdit">Cancel</button>
                                     </div>
@@ -1070,7 +1070,7 @@
                                     <div class="sub-panel-title">EXPORT</div>
                                     <div class="export-grid" role="group" aria-label="Export options">
                                         <div class="export-item">
-                                            <span class="with-tooltip" style="display: inline-flex; align-items: center; gap: 4px;">
+                                            <span class="with-tooltip export-action">
                                                 <button type="button" class="btn-primary export-btn-main" data-action="downloadXml" aria-describedby="downloadXml-tooltip">XML Configuration</button>
                                                 <button type="button" class="tooltip-icon" aria-label="Help for XML Configuration" aria-describedby="downloadXml-tooltip">?</button>
                                                 <span class="tooltip-content" id="downloadXml-tooltip" role="tooltip">
@@ -1085,7 +1085,7 @@
                                             <span class="export-item-desc">Upload to Intune OMA-URI or Windows Configuration Designer</span>
                                         </div>
                                         <div class="export-item">
-                                            <span class="with-tooltip" style="display: inline-flex; align-items: center; gap: 4px;">
+                                            <span class="with-tooltip export-action">
                                                 <button type="button" class="btn-primary export-btn-main" data-action="downloadPowerShell" aria-describedby="onDemandScript-tooltip">On-Demand Kiosk Script</button>
                                                 <button type="button" class="tooltip-icon" aria-label="Help for On-Demand Kiosk Script" aria-describedby="onDemandScript-tooltip">?</button>
                                                 <span class="tooltip-content" id="onDemandScript-tooltip" role="tooltip">
@@ -1105,7 +1105,7 @@
                                         </div>
                                         <div class="export-item-separator"></div>
                                         <div class="export-item">
-                                            <span class="with-tooltip" style="display: inline-flex; align-items: center; gap: 4px;">
+                                            <span class="with-tooltip export-action">
                                                 <button type="button" class="btn-secondary" data-action="downloadShortcutsScript" aria-describedby="shortcutCreator-tooltip">Shortcut Creator</button>
                                                 <button type="button" class="tooltip-icon" aria-label="Help for Shortcut Creator" aria-describedby="shortcutCreator-tooltip">?</button>
                                                 <span class="tooltip-content" id="shortcutCreator-tooltip" role="tooltip">
@@ -1124,7 +1124,7 @@
                                             <span class="export-item-desc">Creates .lnk shortcut files — deploy as a separate Intune app alongside the XML</span>
                                         </div>
                                         <div class="export-item">
-                                            <span class="with-tooltip" style="display: inline-flex; align-items: center; gap: 4px;">
+                                            <span class="with-tooltip export-action">
                                                 <button type="button" class="btn-secondary" data-action="downloadEdgeManifestWorkaround" aria-describedby="manifestOverride-tooltip">Manifest Override</button>
                                                 <button type="button" class="tooltip-icon" aria-label="Help for Manifest Override" aria-describedby="manifestOverride-tooltip">?</button>
                                                 <span class="tooltip-content" id="manifestOverride-tooltip" role="tooltip">
@@ -1239,37 +1239,37 @@
                                             </div>
                                             <p><strong>For Option B above:</strong> Follow these steps to package both scripts as Win32 apps</p>
 
-                                            <h5 style="margin-top: 16px; margin-bottom: 8px; font-size: 0.9rem;">7a. Get IntuneWinAppUtil Tool</h5>
-                                            <ol style="margin-left: 20px; font-size: 0.85rem;">
+                                            <h5 class="deploy-subheading">7a. Get IntuneWinAppUtil Tool</h5>
+                                            <ol class="deploy-ol">
                                                 <li>Download from <a href="https://github.com/microsoft/Microsoft-Win32-Content-Prep-Tool" target="_blank" rel="noopener noreferrer">Microsoft GitHub</a></li>
                                                 <li>Extract <code>IntuneWinAppUtil.exe</code> to a folder (e.g., <code>C:\IntuneTools\</code>)</li>
                                             </ol>
 
-                                            <h5 style="margin-top: 16px; margin-bottom: 8px; font-size: 0.9rem;">7b. Package Shortcut Creator</h5>
-                                            <ol style="margin-left: 20px; font-size: 0.85rem;">
+                                            <h5 class="deploy-subheading">7b. Package Shortcut Creator</h5>
+                                            <ol class="deploy-ol">
                                                 <li>Create source folder: <code>C:\IntunePackaging\ShortcutCreator\</code></li>
                                                 <li>Place downloaded Shortcut Creator script in folder (e.g., <code>CreateShortcuts_Lobby-Kiosk.ps1</code>)</li>
                                                 <li>Run IntuneWinAppUtil (replace filename with your actual script name):
                                                     <div class="deploy-code-wrapper" style="margin-top: 8px;">
-                                                        <pre class="deploy-code crt-pane" style="font-size: 0.75rem;">IntuneWinAppUtil.exe -c "C:\IntunePackaging\ShortcutCreator" -s "CreateShortcuts_YourConfigName.ps1" -o "C:\IntunePackaging\Output"</pre>
+                                                        <pre class="deploy-code crt-pane deploy-code-sm">IntuneWinAppUtil.exe -c "C:\IntunePackaging\ShortcutCreator" -s "CreateShortcuts_YourConfigName.ps1" -o "C:\IntunePackaging\Output"</pre>
                                                     </div>
                                                 </li>
                                                 <li>Upload the generated <code>.intunewin</code> file to Intune</li>
                                             </ol>
 
-                                            <p style="margin-top: 12px; font-size: 0.85rem;"><strong>Install command (replace filename with your actual script name):</strong></p>
+                                            <p class="deploy-p"><strong>Install command (replace filename with your actual script name):</strong></p>
                                             <div class="deploy-code-wrapper">
-                                                <pre class="deploy-code crt-pane" style="font-size: 0.75rem;">powershell.exe -ExecutionPolicy Bypass -File "CreateShortcuts_YourConfigName.ps1"</pre>
+                                                <pre class="deploy-code crt-pane deploy-code-sm">powershell.exe -ExecutionPolicy Bypass -File "CreateShortcuts_YourConfigName.ps1"</pre>
                                             </div>
 
-                                            <p style="margin-top: 12px; font-size: 0.85rem;"><strong>Uninstall command:</strong></p>
+                                            <p class="deploy-p"><strong>Uninstall command:</strong></p>
                                             <div class="deploy-code-wrapper">
-                                                <pre class="deploy-code crt-pane" style="font-size: 0.75rem;">powershell.exe -Command "Write-Host 'Shortcuts remain in place'"</pre>
+                                                <pre class="deploy-code crt-pane deploy-code-sm">powershell.exe -Command "Write-Host 'Shortcuts remain in place'"</pre>
                                             </div>
 
-                                            <p style="margin-top: 12px; font-size: 0.85rem;"><strong>Detection script (PowerShell):</strong></p>
+                                            <p class="deploy-p"><strong>Detection script (PowerShell):</strong></p>
                                             <div class="deploy-code-wrapper">
-                                                <pre class="deploy-code crt-pane" style="font-size: 0.75rem;"># Detect Shortcut Creator - checks for sentinel file
+                                                <pre class="deploy-code crt-pane deploy-code-sm"># Detect Shortcut Creator - checks for sentinel file
 $sentinelPath = "$env:ProgramData\KioskOverseer\ShortcutCreator.installed"
 if (Test-Path $sentinelPath) {
     Write-Host "Shortcut Creator installed"
@@ -1278,33 +1278,33 @@ if (Test-Path $sentinelPath) {
     exit 1
 }</pre>
                                             </div>
-                                            <p style="margin-top: 8px; font-size: 0.8rem;"><em>Note: The Shortcut Creator script automatically creates this sentinel file - no manual modification needed.</em></p>
+                                            <p class="deploy-p-small"><em>Note: The Shortcut Creator script automatically creates this sentinel file - no manual modification needed.</em></p>
 
-                                            <h5 style="margin-top: 16px; margin-bottom: 8px; font-size: 0.9rem;">7c. Package Manifest Override</h5>
-                                            <ol style="margin-left: 20px; font-size: 0.85rem;">
+                                            <h5 class="deploy-subheading">7c. Package Manifest Override</h5>
+                                            <ol class="deploy-ol">
                                                 <li>Create source folder: <code>C:\IntunePackaging\ManifestOverride\</code></li>
                                                 <li>Place both install and remove scripts in folder</li>
                                                 <li>Run IntuneWinAppUtil:
                                                     <div class="deploy-code-wrapper" style="margin-top: 8px;">
-                                                        <pre class="deploy-code crt-pane" style="font-size: 0.75rem;">IntuneWinAppUtil.exe -c "C:\IntunePackaging\ManifestOverride" -s "KioskOverseer-EdgeVisualElements-Install.ps1" -o "C:\IntunePackaging\Output"</pre>
+                                                        <pre class="deploy-code crt-pane deploy-code-sm">IntuneWinAppUtil.exe -c "C:\IntunePackaging\ManifestOverride" -s "KioskOverseer-EdgeVisualElements-Install.ps1" -o "C:\IntunePackaging\Output"</pre>
                                                     </div>
                                                 </li>
                                                 <li>Upload the generated <code>.intunewin</code> file to Intune</li>
                                             </ol>
 
-                                            <p style="margin-top: 12px; font-size: 0.85rem;"><strong>Install command:</strong></p>
+                                            <p class="deploy-p"><strong>Install command:</strong></p>
                                             <div class="deploy-code-wrapper">
-                                                <pre class="deploy-code crt-pane" style="font-size: 0.75rem;">powershell.exe -ExecutionPolicy Bypass -File "KioskOverseer-EdgeVisualElements-Install.ps1"</pre>
+                                                <pre class="deploy-code crt-pane deploy-code-sm">powershell.exe -ExecutionPolicy Bypass -File "KioskOverseer-EdgeVisualElements-Install.ps1"</pre>
                                             </div>
 
-                                            <p style="margin-top: 12px; font-size: 0.85rem;"><strong>Uninstall command:</strong></p>
+                                            <p class="deploy-p"><strong>Uninstall command:</strong></p>
                                             <div class="deploy-code-wrapper">
-                                                <pre class="deploy-code crt-pane" style="font-size: 0.75rem;">powershell.exe -ExecutionPolicy Bypass -File "KioskOverseer-EdgeVisualElements-Remove.ps1"</pre>
+                                                <pre class="deploy-code crt-pane deploy-code-sm">powershell.exe -ExecutionPolicy Bypass -File "KioskOverseer-EdgeVisualElements-Remove.ps1"</pre>
                                             </div>
 
-                                            <p style="margin-top: 12px; font-size: 0.85rem;"><strong>Detection script (PowerShell):</strong></p>
+                                            <p class="deploy-p"><strong>Detection script (PowerShell):</strong></p>
                                             <div class="deploy-code-wrapper">
-                                                <pre class="deploy-code crt-pane" style="font-size: 0.75rem;"># Detect Manifest Override - checks for backup file and scheduled task
+                                                <pre class="deploy-code crt-pane deploy-code-sm"># Detect Manifest Override - checks for backup file and scheduled task
 $taskExists = Get-ScheduledTask -TaskName "KioskOverseer-EdgeVisualElements" -ErrorAction SilentlyContinue
 $backupExists = Test-Path "$env:ProgramFiles\Microsoft\Edge\Application\msedge.VisualElementsManifest.xml.kioskoverseer.bak"
 
@@ -1473,6 +1473,7 @@ if ($taskExists -and $backupExists) {
         <section class="panel" aria-labelledby="preview-heading">
             <h2 id="preview-heading" class="panel-header">
                 <span data-section-key="xmlPreview"></span>
+                <button type="button" class="btn-secondary btn-small" data-action="copyXmlPreview" aria-label="Copy XML to clipboard">Copy XML</button>
             </h2>
             <div class="panel-content preview-content">
                 <pre class="xml-preview crt-terminal crt-pane" id="xmlPreview" aria-label="Generated XML configuration (read-only)" aria-readonly="true" tabindex="0">
@@ -1569,17 +1570,17 @@ if ($taskExists -and $backupExists) {
     <!-- ARIA live region for reorder announcements -->
     <div id="reorderLiveRegion" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
 
-    <script src="dom.js?v=2.0.4"></script>
-    <script src="state.js?v=2.0.4"></script>
-    <script src="helpers.js?v=2.0.4"></script>
-    <script src="toast.js?v=2.0.4"></script>
-    <script src="focusTrap.js?v=2.0.4"></script>
-    <script src="xml.js?v=2.0.4"></script>
-    <script src="validation.js?v=2.0.4"></script>
-    <script src="app.js?v=2.0.4"></script>
-    <script src="apps.js?v=2.0.4"></script>
-    <script src="pins.js?v=2.0.4"></script>
-    <script src="exports.js?v=2.0.4"></script>
-    <script src="config.js?v=2.0.4"></script>
+    <script src="dom.js?v=2.0.6"></script>
+    <script src="state.js?v=2.0.6"></script>
+    <script src="helpers.js?v=2.0.6"></script>
+    <script src="toast.js?v=2.0.6"></script>
+    <script src="focusTrap.js?v=2.0.6"></script>
+    <script src="xml.js?v=2.0.6"></script>
+    <script src="validation.js?v=2.0.6"></script>
+    <script src="app.js?v=2.0.6"></script>
+    <script src="apps.js?v=2.0.6"></script>
+    <script src="pins.js?v=2.0.6"></script>
+    <script src="exports.js?v=2.0.6"></script>
+    <script src="config.js?v=2.0.6"></script>
 </body>
 </html>

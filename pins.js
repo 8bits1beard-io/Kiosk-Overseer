@@ -189,18 +189,17 @@ function renderPinListForType(listType) {
 
         const hasArgs = pin.args && !isSecondaryTile ? ` (${truncate(pin.args, 20)})` : '';
         const missingTarget = !isUwp && pin.pinType === 'desktopAppLink' && !pin.target && !pin.systemShortcut;
-        const warningStyle = missingTarget ? 'color: var(--error-color, #e74c3c);' : 'color: var(--text-secondary);';
 
         // Badges
-        const typeLabel = isUwp ? '<span style="background: var(--accent); color: white; padding: 1px 4px; border-radius: 3px; font-size: 0.65rem; margin-left: 6px;">UWP</span>' : '';
+        const typeLabel = isUwp ? '<span class="pin-badge pin-badge--uwp">UWP</span>' : '';
         const linkBadge = pin.pinType === 'desktopAppLink'
-            ? '<span style="background: var(--bg-tertiary); color: var(--text-secondary); padding: 1px 4px; border-radius: 3px; font-size: 0.65rem; margin-left: 6px;">.lnk</span>'
+            ? '<span class="pin-badge pin-badge--lnk">.lnk</span>'
             : '';
         const edgeBadge = isEdgeBackedDesktopPin(pin)
-            ? '<span style="background: var(--bg-tertiary); color: var(--text-secondary); padding: 1px 4px; border-radius: 3px; font-size: 0.65rem; margin-left: 4px;">Edge</span>'
+            ? '<span class="pin-badge pin-badge--edge">Edge</span>'
             : '';
         const edgeWarning = shouldWarnEdgeShortcutPin(pin)
-            ? '<span style="font-size: 0.7rem; color: var(--warning-color, #b26a00);">Note: Edge-backed shortcuts may show as \'Microsoft Edge\' with the Edge icon in Assigned Access; custom .lnk name/icon may be ignored.</span>'
+            ? '<span class="pin-edge-warning">Note: Edge-backed shortcuts may show as \'Microsoft Edge\' with the Edge icon in Assigned Access; custom .lnk name/icon may be ignored.</span>'
             : '';
 
         // Action buttons
@@ -218,11 +217,11 @@ function renderPinListForType(listType) {
             : '';
 
         return `
-        <div class="app-item draggable" role="listitem" data-pin-list="${listType}" data-index="${i}" draggable="true" style="${missingTarget ? 'border-left: 3px solid var(--error-color, #e74c3c);' : ''}">
+        <div class="app-item draggable${missingTarget ? ' pin-item--missing' : ''}" role="listitem" data-pin-list="${listType}" data-index="${i}" draggable="true">
             <button type="button" class="reorder-grip" aria-label="Reorder ${escapeAttr(pin.name || 'pin')}" data-reorder-grip data-pin-list="${listType}" data-index="${i}"><span aria-hidden="true">⠿</span></button>
-            <div style="display: flex; flex-direction: column; flex: 1; min-width: 0;">
-                <span style="font-weight: 500;">${escapeXml(pin.name || 'Unnamed')}${typeLabel}${linkBadge}${edgeBadge}${missingTarget ? ' <span style="color: var(--error-color, #e74c3c);" title="Target path required">⚠</span>' : ''}</span>
-                <span style="font-size: 0.75rem; ${warningStyle} overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeXml(displayTarget)}${escapeXml(hasArgs)}">${escapeXml(displayTarget)}${escapeXml(hasArgs)}</span>
+            <div class="pin-item-body">
+                <span class="pin-item-name">${escapeXml(pin.name || 'Unnamed')}${typeLabel}${linkBadge}${edgeBadge}${missingTarget ? ' <span class="pin-item-target--error" title="Target path required">⚠</span>' : ''}</span>
+                <span class="pin-item-target${missingTarget ? ' pin-item-target--error' : ''}" title="${escapeXml(displayTarget)}${escapeXml(hasArgs)}">${escapeXml(displayTarget)}${escapeXml(hasArgs)}</span>
                 ${edgeWarning}
             </div>
             <div class="pin-actions">

@@ -304,6 +304,18 @@ function loadPreset(preset) {
     updatePreview();
 }
 
+function copyXmlPreview() {
+    const preview = document.getElementById('xmlPreview');
+    const xml = preview ? preview.textContent.trim() : '';
+    if (!xml) {
+        showToast('No XML to copy — configure your kiosk first.', { type: 'info' });
+        return;
+    }
+    navigator.clipboard.writeText(xml)
+        .then(() => showToast('XML copied to clipboard', { type: 'success' }))
+        .catch(() => showToast('Failed to copy XML', { type: 'error' }));
+}
+
 /* ============================================================================
    Event Delegation
    ============================================================================
@@ -373,7 +385,8 @@ const actionHandlers = {
     dismissCallout,
     dismissWelcome,
     toggleTheme,
-    updateSentryUI
+    updateSentryUI,
+    copyXmlPreview
 };
 
 // Debounce guard for download actions to prevent double-triggering

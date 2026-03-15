@@ -535,17 +535,7 @@ function applyPinTargetPreset() {
     }
 }
 
-// Clear auto-filled flag when user manually edits the name
-document.addEventListener('DOMContentLoaded', () => {
-    const pinNameInput = document.getElementById('pinName');
-    if (pinNameInput) {
-        pinNameInput.addEventListener('input', () => { pinNameInput.dataset.autoFilled = 'false'; });
-    }
-    const taskbarPinNameInput = document.getElementById('taskbarPinName');
-    if (taskbarPinNameInput) {
-        taskbarPinNameInput.addEventListener('input', () => { taskbarPinNameInput.dataset.autoFilled = 'false'; });
-    }
-});
+// Clear auto-filled flag when user manually edits the name (registered in initApp below)
 
 function applyEditPinTargetPreset() {
     const presetSelect = dom.get('editPinTargetPreset');
@@ -809,6 +799,7 @@ function openEdgeArgsModal(prefix) {
     updateEdgeArgsModeUI('modal');
 
     const modal = document.getElementById('edgeArgsModal');
+    if (!modal) return;
     modal.classList.remove('hidden');
     modal.setAttribute('aria-hidden', 'false');
     if (!edgeArgsTrap) {
@@ -830,6 +821,7 @@ function applyEdgeArgsModal() {
 
 function hideEdgeArgsModal() {
     const modal = document.getElementById('edgeArgsModal');
+    if (!modal) return;
     modal.classList.add('hidden');
     modal.setAttribute('aria-hidden', 'true');
     edgeArgsModalContext = null;
@@ -1184,6 +1176,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.addEventListener('drop', handlePinDrop);
     document.addEventListener('dragend', handlePinDragEnd);
 
+    // Clear auto-filled flag when user manually edits pin name
+    const pinNameInput = document.getElementById('pinName');
+    if (pinNameInput) {
+        pinNameInput.addEventListener('input', () => { pinNameInput.dataset.autoFilled = 'false'; });
+    }
+    const taskbarPinNameInput = document.getElementById('taskbarPinName');
+    if (taskbarPinNameInput) {
+        taskbarPinNameInput.addEventListener('input', () => { taskbarPinNameInput.dataset.autoFilled = 'false'; });
+    }
+
     // Tooltips: show/hide on click
     document.querySelectorAll('.tooltip-icon').forEach(icon => {
         icon.addEventListener('click', (e) => {
@@ -1203,6 +1205,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.addEventListener('click', () => {
         document.querySelectorAll('.tooltip-content.tooltip-active').forEach(t => t.classList.remove('tooltip-active'));
     });
+    // Close tooltips on resize or scroll (stale fixed positions)
+    let tooltipResizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(tooltipResizeTimer);
+        tooltipResizeTimer = setTimeout(() => {
+            document.querySelectorAll('.tooltip-content.tooltip-active').forEach(t => t.classList.remove('tooltip-active'));
+        }, 150);
+    });
+    window.addEventListener('scroll', () => {
+        document.querySelectorAll('.tooltip-content.tooltip-active').forEach(t => t.classList.remove('tooltip-active'));
+    }, { passive: true });
 
     // Common apps search filter
     const commonAppSearch = document.getElementById('commonAppSearch');

@@ -189,6 +189,14 @@
     --type-section: 1.05rem;
     --type-code: 1rem;
     --page-bg: radial-gradient(circle at top left, #122019 0%, var(--bg-primary) 38%, #070b09 100%);
+    /* Theme-aware accent colors (Fix 4) */
+    --nav-active-bg: rgba(138, 255, 193, 0.16);
+    --link-hover-glow: 0 0 6px rgba(138, 255, 193, 0.35);
+    --callout-border: rgba(138, 255, 193, 0.3);
+    --callout-bg: rgba(138, 255, 193, 0.08);
+    --deploy-glow-base: 0 0 0 1px rgba(138, 255, 193, 0.35), 0 0 10px rgba(138, 255, 193, 0.25);
+    --deploy-glow-hover: 0 0 0 1px rgba(138, 255, 193, 0.5), 0 0 12px rgba(138, 255, 193, 0.35);
+    --deploy-glow-mid: 0 0 0 2px rgba(138, 255, 193, 0.55), 0 0 16px rgba(138, 255, 193, 0.4);
 }
 
 [data-theme="dark"] {
@@ -252,12 +260,24 @@
     --font-primary: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
     --font-secondary: "Cascadia Mono", "Consolas", "Courier New", monospace;
     --page-bg: linear-gradient(180deg, #F6F7FB 0%, #EDF1F6 100%);
+    /* Theme-aware accent colors (Fix 4) */
+    --nav-active-bg: rgba(37, 99, 235, 0.1);
+    --link-hover-glow: none;
+    --callout-border: rgba(37, 99, 235, 0.2);
+    --callout-bg: rgba(37, 99, 235, 0.05);
+    --deploy-glow-base: 0 0 0 1px rgba(37, 99, 235, 0.25), 0 0 10px rgba(37, 99, 235, 0.15);
+    --deploy-glow-hover: 0 0 0 1px rgba(37, 99, 235, 0.4), 0 0 12px rgba(37, 99, 235, 0.2);
+    --deploy-glow-mid: 0 0 0 2px rgba(37, 99, 235, 0.45), 0 0 16px rgba(37, 99, 235, 0.25);
 }
 
 [data-theme="fluent"] .xml-preview,
 [data-theme="fluent"] .xml-preview.crt-terminal {
     background: #000000;
     color: #FFFFFF;
+}
+
+[data-theme="fluent"] .xml-preview.crt-terminal:focus-visible {
+    box-shadow: var(--crt-inset), 0 0 0 2px var(--accent), 0 0 10px var(--focus-shadow);
 }
 
 
@@ -340,7 +360,7 @@ a {
 
 a:hover {
     color: var(--accent-hover);
-    text-shadow: 0 0 6px rgba(138, 255, 193, 0.35);
+    text-shadow: var(--link-hover-glow);
 }
 
 
@@ -472,8 +492,8 @@ main {
 
 .side-nav-btn.active {
     color: var(--accent);
-    border-color: rgba(138, 255, 193, 0.85);
-    background: rgba(138, 255, 193, 0.16);
+    border-color: var(--accent);
+    background: var(--nav-active-bg);
     box-shadow: none;
 }
 
@@ -499,8 +519,7 @@ main {
 
 .side-nav-logo img {
     display: block;
-    margin: 0 auto -24px;
-    transform: translateX(-6px);
+    margin: 0 auto;
     max-width: 60%;
     height: auto;
     max-height: 252px;
@@ -653,7 +672,7 @@ header h1 {
     min-height: 34px;
     padding: 8px 12px;
     font-size: 0.85rem;
-    border-radius: 2px;
+    border-radius: var(--frame-radius);
     border: var(--frame-border);
     background: var(--bg-primary);
     box-shadow: var(--frame-inset);
@@ -669,7 +688,7 @@ header h1 {
 .command-strip .btn-primary {
     background: var(--accent);
     color: var(--bg-primary);
-    border: 2px solid rgba(138, 255, 193, 0.8);
+    border: 2px solid var(--accent);
 }
 
 .command-strip button:hover {
@@ -678,18 +697,18 @@ header h1 {
 
 .header-actions .btn-deploy {
     border-color: var(--accent);
-    box-shadow: 0 0 0 1px rgba(138, 255, 193, 0.35), 0 0 10px rgba(138, 255, 193, 0.25);
+    box-shadow: var(--deploy-glow-base);
     position: relative;
     animation: deployGlow 2.8s ease-in-out infinite, deployJitter 4.2s steps(1, end) infinite;
 }
 
 .header-actions .btn-deploy:hover {
-    box-shadow: 0 0 0 1px rgba(138, 255, 193, 0.5), 0 0 12px rgba(138, 255, 193, 0.35);
+    box-shadow: var(--deploy-glow-hover);
 }
 
 @keyframes deployGlow {
-    0%, 100% { box-shadow: 0 0 0 1px rgba(138, 255, 193, 0.35), 0 0 10px rgba(138, 255, 193, 0.25); }
-    50% { box-shadow: 0 0 0 2px rgba(138, 255, 193, 0.55), 0 0 16px rgba(138, 255, 193, 0.4); }
+    0%, 100% { box-shadow: var(--deploy-glow-base); }
+    50% { box-shadow: var(--deploy-glow-mid); }
 }
 
 @keyframes deployJitter {
@@ -818,7 +837,7 @@ h2.panel-header {
     text-transform: uppercase;
     letter-spacing: 0.05em;
     padding: 1px 6px;
-    border-radius: 2px;
+    border-radius: var(--frame-radius);
     background: var(--accent);
     color: var(--bg-primary);
     vertical-align: middle;
@@ -999,7 +1018,7 @@ button:focus-visible {
     background: transparent;
     color: var(--text-secondary);
     border: var(--frame-border);
-    border-radius: 2px;
+    border-radius: var(--frame-radius);
     font-weight: 700;
     font-family: var(--font-secondary);
 }
@@ -1236,7 +1255,7 @@ legend.section-header {
     margin-right: 6px;
     background: transparent;
     border: var(--frame-border);
-    border-radius: 2px;
+    border-radius: var(--frame-radius);
     color: var(--text-secondary);
     font-size: 0.85rem;
     font-family: var(--font-secondary);
@@ -1290,7 +1309,7 @@ legend.section-header {
     padding: 4px 8px;
     background: transparent;
     border: none;
-    border-radius: 2px;
+    border-radius: var(--frame-radius);
     font-size: 0.9rem;
     line-height: 1;
     transition: background 0.2s;
@@ -1315,7 +1334,7 @@ legend.section-header {
 
 .pin-actions .btn-icon {
     border: var(--frame-border);
-    border-radius: 2px;
+    border-radius: var(--frame-radius);
 }
 
 .pin-actions .btn-icon:disabled {
@@ -1443,7 +1462,7 @@ legend.section-header {
 }
 
 .status.info {
-    background: rgba(138, 255, 193, 0.08);
+    background: var(--callout-bg);
     border: 2px solid var(--accent);
     color: var(--accent);
 }
@@ -1459,13 +1478,6 @@ legend.section-header {
     border: var(--frame-border);
     border-radius: var(--frame-radius);
     background: var(--bg-primary);
-}
-
-.summary-card {
-    border: var(--frame-border);
-    border-radius: var(--frame-radius);
-    padding: 10px 12px;
-    background: var(--bg-secondary);
 }
 
 .summary-card-label {
@@ -1564,6 +1576,201 @@ select.invalid {
 }
 
 /* ============================================
+   Utility Classes
+   ============================================ */
+
+/* Common app category row (Fix 1) */
+.common-app-category {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.category-title {
+    width: 100%;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* Pin form container card (Fix 1) */
+.pin-form-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px;
+    background: var(--bg-tertiary);
+    border-radius: var(--frame-radius);
+}
+
+/* Pin edit panel card (Fix 1) */
+.pin-edit-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+    background: var(--bg-tertiary);
+    border-radius: var(--frame-radius);
+}
+
+/* Inline field label — smaller/dimmer than form-group label (Fix 1) */
+.field-label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+
+/* Full-width form control (Fix 1) */
+.field-full {
+    width: 100%;
+}
+
+/* Flex row layout (Fix 1) */
+.flex-row {
+    display: flex;
+    gap: 8px;
+}
+
+/* Flex grow helpers (Fix 1) */
+.flex-1 { flex: 1; }
+.flex-2 { flex: 2; }
+
+/* Align submit button to start within a flex container (Fix 1) */
+.btn-align-start {
+    align-self: flex-start;
+}
+
+/* Breakout key combination row (Fix 1) */
+.breakout-key-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+/* Breakout modifier key inline label (Fix 1) */
+.breakout-key-label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: normal;
+}
+
+/* Preset selector in command strip (Fix 1/5) */
+.preset-select {
+    min-width: 140px;
+}
+
+/* Export action wrapper — button + tooltip icon (Fix 1) */
+.export-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Edge args group spacing (Fix 1) */
+.edge-args-group {
+    margin-top: 8px;
+}
+
+/* Subtle italicised field note (Fix 1) */
+.field-note {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+/* Pin item body layout (Fix 2) */
+.pin-item-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+/* Pin item name (Fix 2) */
+.pin-item-name {
+    font-weight: 500;
+}
+
+/* Pin item target info line (Fix 2) */
+.pin-item-target {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pin-item-target--error {
+    color: var(--error);
+}
+
+/* Pin item missing-target border indicator (Fix 2) */
+.pin-item--missing {
+    border-left: 3px solid var(--error);
+}
+
+/* Pin type badge — base (Fix 2) */
+.pin-badge {
+    padding: 1px 4px;
+    border-radius: var(--frame-radius);
+    font-size: 0.65rem;
+    margin-left: 6px;
+    font-family: var(--font-secondary);
+}
+
+.pin-badge--uwp {
+    background: var(--accent);
+    color: var(--bg-primary);
+}
+
+.pin-badge--lnk {
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+}
+
+.pin-badge--edge {
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    margin-left: 4px;
+}
+
+/* Pin edge-shortcut warning text (Fix 2) */
+.pin-edge-warning {
+    font-size: 0.7rem;
+    color: var(--warning);
+}
+
+/* Deploy guide typography (Fix 1) */
+.deploy-subheading {
+    margin-top: 16px;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.deploy-ol {
+    margin-left: 20px;
+    font-size: 0.85rem;
+}
+
+.deploy-p {
+    margin-top: 12px;
+    font-size: 0.85rem;
+}
+
+.deploy-p-small {
+    margin-top: 8px;
+    font-size: 0.8rem;
+    font-style: italic;
+}
+
+.deploy-code-sm {
+    font-size: 0.75rem;
+}
+
+/* ============================================
    Responsive
    ============================================ */
 @media (max-width: 768px) {
@@ -1599,7 +1806,56 @@ select.invalid {
         overflow-x: visible;
     }
 
+    /* Fix 5: presetSelect overflows on mobile */
+    .preset-select {
+        min-width: 0;
+        flex: 1;
+    }
 
+    /* Fix 5: command-strip buttons min tap target */
+    .command-strip button,
+    .command-strip select {
+        min-height: 44px;
+    }
+
+    /* Fix 5: Stack flex rows vertically in pin forms */
+    .flex-row {
+        flex-direction: column;
+    }
+
+    /* Fix 5: flex children go full-width when stacked */
+    .flex-1,
+    .flex-2 {
+        flex: none;
+        width: 100%;
+    }
+
+    /* Fix 5: Tighten pin form card padding */
+    .pin-form-card,
+    .pin-edit-card {
+        padding: 8px;
+    }
+
+    /* Fix 5: Breakout key row wraps neatly */
+    .breakout-key-row {
+        gap: 6px;
+    }
+
+    /* Fix 5: deploy steps already block — ensure no overflow */
+    .deploy-code {
+        font-size: 0.75rem;
+        overflow-x: auto;
+    }
+
+    /* Fix 5: export grid single column */
+    .export-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Fix 5: summary cards stack */
+    .summary-cards {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* ============================================
@@ -1636,7 +1892,7 @@ select.invalid {
 }
 
 .xml-preview.crt-terminal:focus-visible {
-    box-shadow: var(--crt-inset), 0 0 0 2px #8AFFC1, 0 0 10px rgba(138, 255, 193, 0.35);
+    box-shadow: var(--crt-inset), 0 0 0 2px var(--accent), 0 0 10px var(--focus-shadow);
 }
 
 @keyframes crtFlicker {
@@ -1792,8 +2048,8 @@ footer span {
    ============================================ */
 .callout {
     position: relative;
-    border: 2px solid rgba(138, 255, 193, 0.3);
-    background: rgba(138, 255, 193, 0.08);
+    border: 2px solid var(--callout-border);
+    background: var(--callout-bg);
     border-radius: var(--frame-radius);
     padding: 12px 14px;
     margin: 12px 0;
@@ -1824,7 +2080,7 @@ footer span {
     font-size: 0.85rem;
     line-height: 1;
     padding: 4px;
-    border-radius: 2px;
+    border-radius: var(--frame-radius);
     font-family: var(--font-secondary);
     font-weight: 700;
 }
@@ -1897,7 +2153,7 @@ footer span {
     min-width: 20px;
     background: var(--bg-tertiary);
     color: var(--text-secondary);
-    border-radius: 2px;
+    border-radius: var(--frame-radius);
     font-size: 0.7rem;
     font-weight: 700;
     cursor: pointer;
@@ -2128,7 +2384,7 @@ label.with-tooltip {
     padding: 6px;
     line-height: 1;
     transition: color 0.2s;
-    border-radius: 2px;
+    border-radius: var(--frame-radius);
     font-family: var(--font-secondary);
     font-weight: 700;
 }
@@ -2710,7 +2966,7 @@ label.with-tooltip {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 2px;
+    border-radius: var(--frame-radius);
     line-height: 1;
 }
 
@@ -2723,7 +2979,7 @@ label.with-tooltip {
     flex-shrink: 0;
     background: transparent;
     border: var(--frame-border);
-    border-radius: 2px;
+    border-radius: var(--frame-radius);
     color: var(--text-secondary);
     font-size: 0.85rem;
     font-family: var(--font-secondary);
