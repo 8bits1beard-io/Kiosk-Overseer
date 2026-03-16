@@ -388,7 +388,11 @@ const actionHandlers = {
     toggleTheme,
     updateSentryUI,
     copyXmlPreview,
-    updatePinMethodUI
+    updatePinMethodUI,
+    scrollToLayoutSection,
+    toggleXmlWrapMode,
+    updateAddAppPlaceholder,
+    filterCommonApps
 };
 
 // Debounce guard for download actions to prevent double-triggering

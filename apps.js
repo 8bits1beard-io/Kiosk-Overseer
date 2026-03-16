@@ -90,6 +90,19 @@ function addCommonApp(appKey) {
     const apps = appPresets.apps;
     const groups = appPresets.groups;
 
+    // Check if primary app is already in the list
+    let primaryValue;
+    if (groups[appKey] && groups[appKey].length > 0) {
+        primaryValue = apps[groups[appKey][0]]?.value;
+    } else {
+        primaryValue = apps[appKey]?.value;
+    }
+    if (primaryValue && state.allowedApps.some(a => a.value === primaryValue)) {
+        const label = document.querySelector(`[data-action="addCommonApp"][data-arg="${appKey}"]`)?.textContent?.trim() || appKey;
+        showToast(`${label} is already in your allowed apps list.`, { type: 'info' });
+        return;
+    }
+
     // Check if this key has a group (multiple apps to add)
     if (groups[appKey]) {
         groups[appKey].forEach(key => {
@@ -145,6 +158,7 @@ function renderAppList() {
         </div>
     `;
     }).join('');
+    syncCommonAppButtons();
 }
 
 /* ============================================================================
@@ -240,6 +254,38 @@ function updateMultiAppEdgeUI() {
             updateSentryUI();
         }
     }
+}
+
+function updateAddAppPlaceholder() {
+    const type = dom.get('addAppType')?.value;
+    const input = dom.get('addAppValue');
+    if (!input) return;
+    if (type === 'aumid') {
+        input.placeholder = 'e.g., Microsoft.WindowsCalculator_8wekyb3d8bbwe!App';
+    } else {
+        input.placeholder = 'e.g., %ProgramFiles%\\App\\app.exe';
+    }
+}
+
+function syncCommonAppButtons() {
+    if (!appPresets) return;
+    const buttons = document.querySelectorAll('[data-action="addCommonApp"]');
+    buttons.forEach(btn => {
+        const appKey = btn.dataset.arg;
+        if (!appKey) return;
+        const groups = appPresets.groups || {};
+        const apps = appPresets.apps || {};
+        // Check if primary app for this key is already in the allowed list
+        let primaryValue;
+        if (groups[appKey] && groups[appKey].length > 0) {
+            primaryValue = apps[groups[appKey][0]]?.value;
+        } else {
+            primaryValue = apps[appKey]?.value;
+        }
+        const isAdded = primaryValue && state.allowedApps.some(a => a.value === primaryValue);
+        btn.classList.toggle('common-app-btn--added', !!isAdded);
+        btn.title = isAdded ? `${btn.textContent.trim()} — already in your allowed apps list` : '';
+    });
 }
 
 function filterCommonApps() {

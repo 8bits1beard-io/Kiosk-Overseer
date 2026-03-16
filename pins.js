@@ -39,6 +39,31 @@ let editingPinListType = null;
    Pin Utility Functions
    ============================================================================ */
 
+function updateEdgeKioskPreview(previewId, args) {
+    const el = document.getElementById(previewId);
+    if (!el) return;
+    if (!args) {
+        el.textContent = 'Not configured — click to set up Edge kiosk mode';
+        el.classList.add('edge-args-preview--unconfigured');
+        return;
+    }
+    // Parse --edge-kiosk-type and --kiosk URL from args string
+    const modeMatch = args.match(/--edge-kiosk-type[=\s]([\w-]+)/i);
+    const urlMatch = args.match(/--kiosk\s+([\S]+)/i);
+    const mode = modeMatch ? (modeMatch[1] === 'public-browsing' ? 'Public Browsing' : 'Kiosk Fullscreen') : null;
+    const url = urlMatch ? urlMatch[1] : null;
+    if (mode || url) {
+        const parts = [];
+        if (mode) parts.push(mode);
+        if (url) parts.push(`URL: ${url}`);
+        el.textContent = parts.join(' | ');
+        el.classList.remove('edge-args-preview--unconfigured');
+    } else {
+        el.textContent = 'Custom args configured — click to modify';
+        el.classList.remove('edge-args-preview--unconfigured');
+    }
+}
+
 function buildUniquePinName(baseName, listType) {
     const config = PIN_LIST_CONFIG[listType || 'start'];
     const pins = state[config.stateKey];
@@ -212,36 +237,36 @@ function renderPinListForType(listType) {
         const editAction = listType === 'start' ? 'editPin' : 'editTaskbarPin';
         const removeAction = listType === 'start' ? 'removePin' : 'removeTaskbarPin';
         const duplicateBtn = config.supportsDuplicate
-            ? `<button type="button" class="btn-icon btn-small" data-action="duplicatePin" data-arg="${i}" aria-label="Duplicate ${escapeAttr(pin.name)}"><span aria-hidden="true">⧉</span></button>`
+            ? `<button type="button" class="btn-icon btn-small" data-action="duplicatePin" data-arg="${i}" aria-label="Duplicate ${escapeAttr(pin.name)}" title="Duplicate"><span aria-hidden="true">⧉</span><span class="pin-btn-label">Duplicate</span></button>`
             : '';
 
         // Copy to Taskbar button - only for Start pins that are valid taskbar types (not secondary tiles)
         const copyToTaskbarBtn = (listType === 'start' && (pin.pinType === 'desktopAppLink' || pin.pinType === 'packagedAppId'))
-            ? `<button type="button" class="btn-icon btn-small" data-action="copyPinToTaskbar" data-arg="${i}" aria-label="Copy ${escapeAttr(pin.name)} to Taskbar" title="Copy to Taskbar"><span aria-hidden="true">⤵</span></button>`
+            ? `<button type="button" class="btn-icon btn-small" data-action="copyPinToTaskbar" data-arg="${i}" aria-label="Copy ${escapeAttr(pin.name)} to Taskbar" title="Copy to Taskbar"><span aria-hidden="true">⤵</span><span class="pin-btn-label">Copy to Taskbar</span></button>`
             : '';
 
         return `
         <div class="app-item draggable${missingTarget ? ' pin-item--missing' : ''}" role="listitem" data-pin-list="${listType}" data-index="${i}" draggable="true">
-            <button type="button" class="reorder-grip" aria-label="Reorder ${escapeAttr(pin.name || 'pin')}" data-reorder-grip data-pin-list="${listType}" data-index="${i}"><span aria-hidden="true">⠿</span></button>
+            <button type="button" class="reorder-grip" aria-label="Reorder ${escapeAttr(pin.name || 'pin')}" title="Drag to reorder" data-reorder-grip data-pin-list="${listType}" data-index="${i}"><span aria-hidden="true">⠿</span></button>
             <div class="pin-item-body">
                 <span class="pin-item-name">${escapeXml(pin.name || 'Unnamed')}${typeLabel}${aumidBadge}${linkBadge}${edgeBadge}${missingTarget ? ' <span class="pin-item-target--error" title="Target path required">⚠</span>' : ''}</span>
                 <span class="pin-item-target${missingTarget ? ' pin-item-target--error' : ''}" title="${escapeXml(displayTarget)}${escapeXml(hasArgs)}">${escapeXml(displayTarget)}${escapeXml(hasArgs)}</span>
                 ${edgeWarning}
             </div>
             <div class="pin-actions">
-                <button type="button" class="btn-icon btn-small" data-action="${moveUpAction}" data-arg="${i}" aria-label="Move ${escapeAttr(pin.name || 'pin')} up" ${i === 0 ? 'disabled' : ''}>
-                    <span aria-hidden="true">↑</span>
+                <button type="button" class="btn-icon btn-small" data-action="${moveUpAction}" data-arg="${i}" aria-label="Move ${escapeAttr(pin.name || 'pin')} up" title="Move up" ${i === 0 ? 'disabled' : ''}>
+                    <span aria-hidden="true">↑</span><span class="pin-btn-label">Move up</span>
                 </button>
-                <button type="button" class="btn-icon btn-small" data-action="${moveDownAction}" data-arg="${i}" aria-label="Move ${escapeAttr(pin.name || 'pin')} down" ${i === displayPins.length - 1 ? 'disabled' : ''}>
-                    <span aria-hidden="true">↓</span>
+                <button type="button" class="btn-icon btn-small" data-action="${moveDownAction}" data-arg="${i}" aria-label="Move ${escapeAttr(pin.name || 'pin')} down" title="Move down" ${i === displayPins.length - 1 ? 'disabled' : ''}>
+                    <span aria-hidden="true">↓</span><span class="pin-btn-label">Move down</span>
                 </button>
                 ${duplicateBtn}
                 ${copyToTaskbarBtn}
-                <button type="button" class="btn-icon btn-small" data-action="${editAction}" data-arg="${i}" aria-label="Edit ${escapeAttr(pin.name || 'pin')}">
-                    <span aria-hidden="true">✎</span>
+                <button type="button" class="btn-icon btn-small" data-action="${editAction}" data-arg="${i}" aria-label="Edit ${escapeAttr(pin.name || 'pin')}" title="Edit">
+                    <span aria-hidden="true">✎</span><span class="pin-btn-label">Edit</span>
                 </button>
-                <button type="button" class="remove-btn" data-action="${removeAction}" data-arg="${i}" aria-label="Remove ${escapeAttr(pin.name || 'pin')}">
-                    <span aria-hidden="true">✕</span>
+                <button type="button" class="remove-btn" data-action="${removeAction}" data-arg="${i}" aria-label="Remove ${escapeAttr(pin.name || 'pin')}" title="Remove">
+                    <span aria-hidden="true">✕</span><span class="pin-btn-label">Remove</span>
                 </button>
             </div>
         </div>
@@ -423,8 +448,15 @@ function editPin(index) {
     editingPinIndex = index;
     editingPinListType = 'start';
 
+    const PIN_TYPE_LABELS = {
+        desktopAppLink: 'Shortcut (.lnk)',
+        desktopAppId: 'App ID (AUMID)',
+        packagedAppId: 'UWP App',
+        secondaryTile: 'Edge Site Tile'
+    };
     dom.get('editPinName').value = pin.name || '';
-    dom.get('editPinType').textContent = pin.pinType || 'desktopAppLink';
+    const typeLabel = PIN_TYPE_LABELS[pin.pinType] || pin.pinType || 'Shortcut (.lnk)';
+    dom.get('editPinType').textContent = `— ${typeLabel}`;
 
     dom.get('editDesktopFields').classList.toggle('hidden', pin.pinType !== 'desktopAppLink');
     dom.get('editPackagedFields').classList.toggle('hidden', pin.pinType !== 'packagedAppId');
@@ -437,6 +469,7 @@ function editPin(index) {
         dom.get('editPinIconPath').value = pin.iconPath || '';
         dom.get('editPinShortcutPath').value = pin.systemShortcut || '';
         updateEdgeArgsVisibility('editPin', 'editPinTarget', 'editPinEdgeArgsGroup');
+        updateEdgeKioskPreview('editPinEdgeArgsPreview', pin.args || '');
     } else if (pin.pinType === 'packagedAppId') {
         dom.get('editPinPackagedAppId').value = pin.packagedAppId || '';
     } else if (pin.pinType === 'secondaryTile') {
@@ -464,6 +497,7 @@ function editTaskbarPin(index) {
     dom.get('editTaskbarPinIconPath').value = pin.iconPath || '';
 
     updateEdgeArgsVisibility('editTaskbar', 'editTaskbarPinTarget', 'editTaskbarEdgeArgsGroup');
+    updateEdgeKioskPreview('editTaskbarEdgeArgsPreview', pin.args || '');
     updateEditTaskbarPinTypeUI();
 
     dom.get('taskbarEditPanel').classList.remove('hidden');

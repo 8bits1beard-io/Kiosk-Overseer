@@ -144,13 +144,44 @@ function switchTab(tabId) {
         panel.classList.toggle('active', isActive);
     });
 
+    // Show/hide Layout sub-nav
+    const layoutSubNav = document.getElementById('layout-sub-nav');
+    if (layoutSubNav) {
+        layoutSubNav.classList.toggle('hidden', tabId !== 'layout');
+    }
+
     // Show save config reminder when entering Summary & Export tab
     if (tabId === 'summary') {
         const reminder = document.querySelector('.callout[data-callout-id="save-config-reminder"]');
         if (reminder && !sessionStorage.getItem('callout:save-config-reminder')) {
             reminder.classList.remove('hidden');
         }
+        // Show GitHub star callout only after user has exported at least once
+        const starCallout = document.querySelector('.callout[data-callout-id="star-github"]');
+        if (starCallout && !sessionStorage.getItem('callout:star-github') && sessionStorage.getItem('hasExported')) {
+            starCallout.classList.remove('hidden');
+        }
     }
+}
+
+function scrollToLayoutSection(sectionId) {
+    const section = document.getElementById(sectionId);
+    if (!section) return;
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Switch to Layout tab first if not already there
+    const layoutPanel = document.getElementById('tab-layout');
+    if (layoutPanel && !layoutPanel.classList.contains('active')) {
+        switchTab('layout');
+        setTimeout(() => section.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+    }
+}
+
+function toggleXmlWrapMode() {
+    const preview = document.getElementById('xmlPreview');
+    const btn = document.getElementById('xmlWrapToggle');
+    if (!preview || !btn) return;
+    const isScrollMode = preview.classList.toggle('xml-mode-scroll');
+    btn.textContent = isScrollMode ? 'Wrap: Off' : 'Wrap: On';
 }
 
 function updateTabVisibility() {
@@ -168,6 +199,12 @@ function updateTabVisibility() {
     }
 
     setTabVisible(layoutTab, isMultiOrRestricted);
+
+    // Also hide/show the layout sub-nav when the layout tab visibility changes
+    const layoutSubNav = document.getElementById('layout-sub-nav');
+    if (layoutSubNav && !isMultiOrRestricted) {
+        layoutSubNav.classList.add('hidden');
+    }
 
     // Hide file explorer access in single mode (lives in apps tab)
     const fileExplorerSection = document.getElementById('fileExplorerSection');
@@ -976,7 +1013,15 @@ function updateTabIndicators() {
     });
     tabNames.forEach(tab => {
         const btn = document.getElementById(`tab-btn-${tab}`);
-        if (btn) btn.classList.toggle('tab-has-errors', errorsByTab[tab]);
+        if (!btn) return;
+        btn.classList.toggle('tab-has-errors', errorsByTab[tab]);
+        if (errorsByTab[tab]) {
+            btn.title = `${btn.textContent.trim()} — Needs attention`;
+            btn.setAttribute('aria-description', 'This step has incomplete or invalid fields that need attention.');
+        } else {
+            btn.removeAttribute('title');
+            btn.removeAttribute('aria-description');
+        }
     });
 }
 

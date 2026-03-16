@@ -1056,11 +1056,15 @@ function buildShortcutsJson() {
    Download Functions
    ============================================================================ */
 
+function markExported() {
+    sessionStorage.setItem('hasExported', '1');
+}
+
 function downloadXml() {
     if (!showValidation()) {
         if (!confirm('Configuration has errors. Download anyway?')) return;
     }
-
+    markExported();
     const xml = generateXml();
     downloadFile(xml, getConfigFileName('xml'), 'application/xml');
 }
@@ -1069,7 +1073,7 @@ function downloadPowerShell() {
     if (!showValidation()) {
         if (!confirm('Configuration has errors. Download anyway?')) return;
     }
-
+    markExported();
     const xml = generateXml();
 
     // Generate shortcuts JSON for PowerShell
@@ -1158,6 +1162,7 @@ function downloadPowerShell() {
 }
 
 function downloadShortcutsScript() {
+    markExported();
     // Single-app mode doesn't use Start Menu pins or taskbar
     if (state.mode === 'single') {
         showToast('Shortcut Creator is not needed for single-app kiosks. Single-app mode runs one app fullscreen without Start Menu access.', { type: 'info' });
@@ -1188,6 +1193,7 @@ function downloadShortcutsScript() {
 }
 
 function downloadEdgeManifestWorkaround() {
+    markExported();
     downloadFile(PS_EDGE_MANIFEST_INSTALL, 'KioskOverseer-EdgeVisualElements-Install.ps1', 'text/plain');
     setTimeout(() => {
         downloadFile(PS_EDGE_MANIFEST_REMOVE, 'KioskOverseer-EdgeVisualElements-Remove.ps1', 'text/plain');

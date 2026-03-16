@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://static.cloudflareinsights.com; font-src 'self'; connect-src 'self' https://cloudflareinsights.com; base-uri 'self'; form-action 'self'">
     <title>Kiosk Overseer (Windows Kiosk Builder)</title>
-    <link rel="stylesheet" href="styles.css?v=2.0.7">
+    <link rel="stylesheet" href="styles.css?v=2.0.8">
     <link rel="icon" type="image/png" href="assets/logo-mksa.png">
 </head>
 <body>
@@ -15,7 +15,7 @@
     <header role="banner">
         <div class="header-top">
             <div class="header-system-label">
-                KIOSK OVERSEER // BUILD 2.0.7
+                KIOSK OVERSEER // BUILD 2.0.8
             </div>
             <nav class="header-actions command-strip" aria-label="Main actions">
                 <button type="button" class="btn-secondary" data-action="loadPreset" data-arg="blank">New</button>
@@ -35,9 +35,17 @@
         <aside class="side-nav" role="navigation" aria-label="Configuration">
             <div class="side-nav-tabs" role="tablist" aria-label="Configuration sections">
                 <div class="side-nav-title" data-section-key="navigation"></div>
+                <div class="side-nav-legend" aria-hidden="true">
+                    <span class="side-nav-legend-dot"></span> Needs attention
+                </div>
                 <button type="button" class="side-nav-btn active" role="tab" aria-selected="true" aria-controls="tab-mode" id="tab-btn-mode" data-action="switchTab" data-arg="mode" data-section-key="navMode">STEP 1: Kiosk Mode</button>
                 <button type="button" class="side-nav-btn" role="tab" aria-selected="false" aria-controls="tab-apps" id="tab-btn-apps" data-action="switchTab" data-arg="apps" data-section-key="navApps">STEP 2: Applications</button>
                 <button type="button" class="side-nav-btn" role="tab" aria-selected="false" aria-controls="tab-layout" id="tab-btn-layout" data-action="switchTab" data-arg="layout" data-section-key="navLayout">STEP 3: Layout</button>
+                <div id="layout-sub-nav" class="side-nav-sub-group hidden" aria-label="Layout sections">
+                    <button type="button" class="side-nav-sub-btn" data-action="scrollToLayoutSection" data-arg="layout-section-taskbar">Taskbar</button>
+                    <button type="button" class="side-nav-sub-btn" data-action="scrollToLayoutSection" data-arg="layout-section-startpins">Start Menu Pins</button>
+                    <button type="button" class="side-nav-sub-btn" data-action="scrollToLayoutSection" data-arg="layout-section-taskbarpins">Taskbar Pins</button>
+                </div>
                 <button type="button" class="side-nav-btn" role="tab" aria-selected="false" aria-controls="tab-account" id="tab-btn-account" data-action="switchTab" data-arg="account" data-section-key="navAccount">STEP 4: Account & Identity</button>
                 <button type="button" class="side-nav-btn" role="tab" aria-selected="false" aria-controls="tab-device" id="tab-btn-device" data-action="switchTab" data-arg="device" data-section-key="navDevice">STEP 5: Device Settings</button>
                 <button type="button" class="side-nav-btn" role="tab" aria-selected="false" aria-controls="tab-summary" id="tab-btn-summary" data-action="switchTab" data-arg="summary" data-section-key="navSummary">Summary & Export</button>
@@ -304,14 +312,15 @@
                                 </label>
                                 <div class="input-group" role="group" aria-labelledby="addApp-label">
                                     <label for="addAppType" class="sr-only">Application type</label>
-                                    <select id="addAppType" style="width: 150px;">
+                                    <select id="addAppType" style="width: 150px;" data-change="updateAddAppPlaceholder">
                                         <option value="path">Path (.exe)</option>
                                         <option value="aumid">AUMID (UWP)</option>
                                     </select>
                                     <label for="addAppValue" class="sr-only">Application path or AUMID</label>
-                                    <input type="text" id="addAppValue" placeholder="Path or AUMID">
+                                    <input type="text" id="addAppValue" placeholder="e.g., %ProgramFiles%\App\app.exe">
                                     <button type="button" class="btn-primary" data-action="addApp">Add</button>
                                 </div>
+                                <p class="hint" style="margin-top: 4px; font-size: 0.78rem; color: var(--text-secondary);">Use environment variables like <code>%ProgramFiles%</code> or <code>%ProgramFiles(x86)%</code> for portable paths.</p>
                             </div>
                             </div>
 
@@ -416,7 +425,7 @@
                                             <span class="toggle-slider" aria-hidden="true"></span>
                                         </span>
                                         <label for="enableSentry" class="with-tooltip">
-                                            Relaunch if Closed <span class="badge-script">Script Only</span>
+                                            Relaunch if Closed <span class="badge-script" title="This setting is applied by the On-Demand Kiosk Script only. It does not affect the Assigned Access XML. For Intune/MDM deployments, configure this separately." aria-label="Script Only — applied by On-Demand Kiosk Script, not by the XML configuration">Script Only</span>
                                             <button type="button" class="tooltip-icon" aria-label="Help for App Sentry" aria-describedby="sentry-tooltip">?</button>
                                             <span class="tooltip-content" id="sentry-tooltip" role="tooltip">Creates a Windows Scheduled Task that monitors the auto-launch app process. If the app is closed (e.g., by an Intune idle timeout policy), it is automatically relaunched with the configured arguments.</span>
                                         </label>
@@ -529,7 +538,7 @@
 
                     <!-- Layout Tab (Multi-App only) -->
                     <div class="tab-content" role="tabpanel" id="tab-layout" aria-labelledby="tab-btn-layout">
-                <fieldset class="section">
+                <fieldset class="section" id="layout-section-taskbar">
                     <legend class="section-header" data-section-key="taskbarControls"></legend>
                     <div class="section-content">
                         <div class="sub-panel">
@@ -561,7 +570,7 @@
                         </div>
                     </div>
                 </fieldset>
-                    <fieldset class="section">
+                    <fieldset class="section" id="layout-section-startpins">
                         <legend class="section-header collapsible-header" data-section-key="startMenuPins" aria-expanded="true" role="button" tabindex="0" aria-controls="collapsible-startMenuPins"></legend>
                         <div class="section-content collapsible-content" id="collapsible-startMenuPins">
                             <div class="form-group">
@@ -710,8 +719,10 @@
                                                 <input type="text" id="editPinArgs" class="field-full">
                                             </div>
                                         </div>
-                                        <div id="editPinEdgeArgsGroup" class="edge-args-group hidden" aria-hidden="true">
+                                        <div id="editPinEdgeArgsGroup" class="edge-args-section hidden" aria-hidden="true">
+                                            <div class="edge-args-section-title">Edge Kiosk Settings</div>
                                             <button type="button" class="btn-secondary btn-small" data-action="openEdgeArgsModal" data-arg="editPin">Configure Kiosk Mode...</button>
+                                            <div id="editPinEdgeArgsPreview" class="edge-args-preview edge-args-preview--unconfigured">Not configured — click to set up Edge kiosk mode</div>
                                         </div>
                                         <div class="flex-row" style="margin-top: 8px;">
                                             <div class="flex-1">
@@ -757,7 +768,7 @@
                         </div>
                     </fieldset>
                     <!-- Taskbar Pins Section -->
-                    <fieldset class="section">
+                    <fieldset class="section" id="layout-section-taskbarpins">
                         <legend class="section-header collapsible-header" data-section-key="taskbarLayout" aria-expanded="true" role="button" tabindex="0" aria-controls="collapsible-taskbarLayout"></legend>
                         <div class="section-content collapsible-content" id="collapsible-taskbarLayout">
                             <div class="sub-panel">
@@ -860,8 +871,10 @@
                                             <label for="editTaskbarPinIconPath" class="field-label">Icon Path (optional, shortcuts only)</label>
                                             <input type="text" id="editTaskbarPinIconPath" class="field-full">
                                         </div>
-                                        <div id="editTaskbarEdgeArgsGroup" class="edge-args-group hidden" aria-hidden="true">
+                                        <div id="editTaskbarEdgeArgsGroup" class="edge-args-section hidden" aria-hidden="true">
+                                            <div class="edge-args-section-title">Edge Kiosk Settings</div>
                                             <button type="button" class="btn-secondary btn-small" data-action="openEdgeArgsModal" data-arg="editTaskbar">Configure Kiosk Mode...</button>
+                                            <div id="editTaskbarEdgeArgsPreview" class="edge-args-preview edge-args-preview--unconfigured">Not configured — click to set up Edge kiosk mode</div>
                                         </div>
                                     </div>
                                     <div class="flex-row">
@@ -1022,7 +1035,7 @@
                                         <span class="toggle-slider" aria-hidden="true"></span>
                                     </span>
                                     <label for="enableTouchKeyboard" class="with-tooltip">
-                                        Enable Touch Keyboard Auto-Invoke <span class="badge-script">Script Only</span>
+                                        Enable Touch Keyboard Auto-Invoke <span class="badge-script" title="This setting is applied by the On-Demand Kiosk Script only. It does not affect the Assigned Access XML. For Intune/MDM deployments, configure this separately via Configuration Profiles or registry policies." aria-label="Script Only — applied by On-Demand Kiosk Script, not by the XML configuration">Script Only</span>
                                         <button type="button" class="tooltip-icon" aria-label="Help for Touch Keyboard" aria-describedby="touchKeyboard-tooltip">?</button>
                                         <span class="tooltip-content" id="touchKeyboard-tooltip" role="tooltip">Forces the Windows touch keyboard to appear automatically when tapping text fields on desktop/laptop devices with touchscreen monitors. Sets registry keys for EnableDesktopModeAutoInvoke and TouchKeyboardTapInvoke. Only applies to the On-Demand Kiosk Script — for Intune/MDM deployments, create a separate Configuration Profile to manage these settings.</span>
                                     </label>
@@ -1041,7 +1054,7 @@
                             <div class="callout-title">Save your configuration</div>
                             <div class="callout-body">Don't lose your work — click <strong>Save Config</strong> in the upper-right corner to download a reusable <code>.kioskoverseer.json</code> file before closing or refreshing the page.</div>
                         </div>
-                        <div class="callout callout-compact" data-callout-id="star-github" role="complementary">
+                        <div class="callout callout-compact hidden" data-callout-id="star-github" role="complementary">
                             <button type="button" class="callout-close" data-action="dismissCallout" aria-label="Dismiss">&times;</button>
                             <div class="callout-title">Enjoying Kiosk Overseer?</div>
                             <div class="callout-body">If this tool saved you time, consider giving it a <a href="https://github.com/8bits1beard-io/Kiosk-Overseer" target="_blank" rel="noopener noreferrer">star on GitHub</a> — it helps others discover the project!</div>
@@ -1508,7 +1521,10 @@ if ($taskExists -and $backupExists) {
         <section class="panel" aria-labelledby="preview-heading">
             <h2 id="preview-heading" class="panel-header">
                 <span data-section-key="xmlPreview"></span>
-                <button type="button" class="btn-secondary btn-small" data-action="copyXmlPreview" aria-label="Copy XML to clipboard">Copy XML</button>
+                <div style="display: flex; gap: 6px; align-items: center;">
+                    <button type="button" class="btn-secondary btn-small xml-wrap-toggle" id="xmlWrapToggle" data-action="toggleXmlWrapMode" title="Toggle between word-wrap and horizontal scroll">Wrap: On</button>
+                    <button type="button" class="btn-secondary btn-small" data-action="copyXmlPreview" aria-label="Copy XML to clipboard">Copy XML</button>
+                </div>
             </h2>
             <div class="panel-content preview-content">
                 <pre class="xml-preview crt-terminal crt-pane" id="xmlPreview" aria-label="Generated XML configuration (read-only)" aria-readonly="true" tabindex="0">
@@ -1605,17 +1621,17 @@ if ($taskExists -and $backupExists) {
     <!-- ARIA live region for reorder announcements -->
     <div id="reorderLiveRegion" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
 
-    <script src="dom.js?v=2.0.7"></script>
-    <script src="state.js?v=2.0.7"></script>
-    <script src="helpers.js?v=2.0.7"></script>
-    <script src="toast.js?v=2.0.7"></script>
-    <script src="focusTrap.js?v=2.0.7"></script>
-    <script src="xml.js?v=2.0.7"></script>
-    <script src="validation.js?v=2.0.7"></script>
-    <script src="app.js?v=2.0.7"></script>
-    <script src="apps.js?v=2.0.7"></script>
-    <script src="pins.js?v=2.0.7"></script>
-    <script src="exports.js?v=2.0.7"></script>
-    <script src="config.js?v=2.0.7"></script>
+    <script src="dom.js?v=2.0.8"></script>
+    <script src="state.js?v=2.0.8"></script>
+    <script src="helpers.js?v=2.0.8"></script>
+    <script src="toast.js?v=2.0.8"></script>
+    <script src="focusTrap.js?v=2.0.8"></script>
+    <script src="xml.js?v=2.0.8"></script>
+    <script src="validation.js?v=2.0.8"></script>
+    <script src="app.js?v=2.0.8"></script>
+    <script src="apps.js?v=2.0.8"></script>
+    <script src="pins.js?v=2.0.8"></script>
+    <script src="exports.js?v=2.0.8"></script>
+    <script src="config.js?v=2.0.8"></script>
 </body>
 </html>
